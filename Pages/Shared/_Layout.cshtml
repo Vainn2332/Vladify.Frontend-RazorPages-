@@ -13,7 +13,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">Главная</a>
+                <a class="navbar-brand" asp-area="" asp-page="/Index">Vladify</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -21,8 +21,28 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Profile">Профиль</a>
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Главная</a>
                         </li>
+                    </ul>
+
+                    @* Иконка профиля. Если данных нет (например, на странице Login), блок просто не будет мешать *@
+                    <ul class="navbar-nav">
+                        @{
+                            var userPic = User.FindFirst("picture")?.Value;
+                        }
+                    
+                        @if (!string.IsNullOrEmpty(userPic))
+                        {
+                            <li class="nav-item">
+                                <a asp-page="/Profile" class="d-flex align-items-center">
+                                    <img src="@userPic"
+                                         alt="Profile"
+                                         title="@User.Identity?.Name"
+                                         class="rounded-circle border"
+                                         style="width: 45px; height: 45px; object-fit: cover;" />
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
