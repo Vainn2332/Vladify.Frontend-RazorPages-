@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Vladify.Frontend.Pages
@@ -12,6 +12,7 @@ namespace Vladify.Frontend.Pages
             _logger = logger;
         }
 
+        [Authorize]
         public void OnGet()
         {
 

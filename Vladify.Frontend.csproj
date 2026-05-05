@@ -10,8 +10,4 @@
     <PackageReference Include="Auth0.AspNetCore.Authentication" Version="1.5.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="services\" />
-  </ItemGroup>
-
 </Project>
