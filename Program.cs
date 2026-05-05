@@ -1,5 +1,6 @@
 using Auth0.AspNetCore.Authentication;
 using Vladify.Frontend;
+using Vladify.Frontend.services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,7 +8,7 @@ builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/");
 
-    options.Conventions.AllowAnonymousToPage("/Auth/Login");
+    options.Conventions.AllowAnonymousToPage("/Account/Login");
 });
 
 builder.Services.AddAuth0WebAppAuthentication(options =>
@@ -32,6 +33,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddHttpClient();
+
+builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
 

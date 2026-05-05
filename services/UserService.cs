@@ -1,9 +1,13 @@
-﻿namespace Vladify.Frontend.services;
+﻿using Vladify.Frontend.models;
+
+namespace Vladify.Frontend.services;
 
 public class UserService(HttpClient client)
 {
-    /*public async Task<UserModel> GetUserByEmail(string email)
+    public async Task<UserModel> GetUserByEmailAsync(string email)
     {
+        var user = await client.GetFromJsonAsync<UserModel>($"{MyConstants.BaseApiUrl}/{email}");
 
-    }*/
+        return user!;
+    }
 }
