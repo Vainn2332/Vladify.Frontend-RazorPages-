@@ -1,4 +1,5 @@
 using Auth0.AspNetCore.Authentication;
+using Vladify.Frontend;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,16 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
     options.Audience = builder.Configuration["Auth0Options:ApiAudience"];
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DefaultPolicy", policy =>
+    {
+        policy.WithOrigins(MyConstants.BaseApiUrl)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
@@ -34,6 +45,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseRouting();
+
+app.UseCors("DefaultPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
