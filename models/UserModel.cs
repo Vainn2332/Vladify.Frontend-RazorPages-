@@ -4,11 +4,13 @@ public class UserModel
 {
     public Guid Id { get; set; }
 
-    public required string Title { get; set; }
+    public required string ExternalId { get; set; }
 
-    public required string Album { get; set; }
+    public required string Name { get; set; }
 
-    public required string Author { get; set; }
+    public required string EmailAddress { get; set; }
 
-    public TimeSpan Duration { get; set; } = TimeSpan.Zero;
+    public required int Age { get; set; }
+
+    public Gender Gender { get; set; } = Gender.Undefined;
 }
