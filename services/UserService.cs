@@ -13,10 +13,10 @@ public class UserService(HttpClient client)
         return user!;
     }
 
-    public async Task<UserModel> UpdateUserAsync(UserUpdateRequestModel userUpdateRequestModel, string accessToken, CancellationToken cancellationToken)
+    public async Task<UserModel> UpdateUserAsync(Guid userId, UserUpdateRequestModel userUpdateRequestModel, string accessToken, CancellationToken cancellationToken)
     {
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        var response = await client.PutAsJsonAsync<UserUpdateRequestModel>($"{MyConstants.BaseApiUrl}/api/users/currentUser", userUpdateRequestModel, cancellationToken);
+        var response = await client.PutAsJsonAsync<UserUpdateRequestModel>($"{MyConstants.BaseApiUrl}/api/users/{userId}", userUpdateRequestModel, cancellationToken);
 
         if (response.IsSuccessStatusCode)
         {
