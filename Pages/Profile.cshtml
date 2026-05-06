@@ -1,7 +1,79 @@
 ﻿@page
 @model Vladify.Frontend.Pages.ProfileModel
 @{
+    ViewData["Title"] = "Мой Профиль";
 }
 
-<h1> Hello it is profile</h1>
-<p>Id:@Model.UserModel.Id</p>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4 text-center">
+            <div class="profile-image-container mb-3">
+
+                @{
+                    var userPic = User.FindFirst("picture")?.Value;
+                }
+                @* Так как в модели нет ссылки на фото, генерируем заглушку по имени *@
+                <img src="@userPic" &size=300&background =74b9ff&color =fff"
+                     class="img-fluid rounded-3 shadow-sm border"
+                     alt="User Avatar" />
+            </div>
+            <h4 class="fw-bold">@Model.UserModel.Name</h4>
+            <p class="text-muted">@Model.UserModel.EmailAddress</p>
+            <button class="btn btn-outline-secondary btn-sm w-100 rounded-pill">Изменить фото</button>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card p-4 border-0 shadow-sm">
+                <h5 class="mb-4 fw-bold">Настройки профиля</h5>
+                
+                <form method="post">
+                    <input type="hidden" asp-for="UserModel.Id" />
+                    <input type="hidden" asp-for="UserModel.ExternalId" />
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="UserModel.Name" class="form-label small fw-bold text-muted text-uppercase">Имя пользователя</label>
+                            <input asp-for="UserModel.Name" class="form-control bg-light border-0" />
+                            <span asp-validation-for="UserModel.Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="UserModel.EmailAddress" class="form-label small fw-bold text-muted text-uppercase">Email</label>
+                            <input asp-for="UserModel.EmailAddress" class="form-control bg-light border-0" type="email" />
+                            <span asp-validation-for="UserModel.EmailAddress" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="UserModel.Age" class="form-label small fw-bold text-muted text-uppercase">Возраст</label>
+                            <input asp-for="UserModel.Age" class="form-control bg-light border-0" type="number" />
+                        </div>
+
+                        <div class="col-md-8 mb-3">
+                            <label asp-for="UserModel.Gender" class="form-label small fw-bold text-muted text-uppercase">Пол</label>
+                            <select asp-for="UserModel.Gender" asp-items="Model.GenderOptions" class="form-select bg-light border-0">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted text-uppercase">ID Аккаунта (Auth0)</label>
+                        <input class="form-control bg-light border-0" value="@Model.UserModel.ExternalId" readonly disabled />
+                        <div class="form-text">Этот идентификатор нельзя изменить вручную.</div>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-accent px-5 rounded-pill shadow-sm">Сохранить изменения</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
