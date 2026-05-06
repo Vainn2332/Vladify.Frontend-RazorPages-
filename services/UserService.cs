@@ -1,12 +1,13 @@
-﻿using Vladify.Frontend.models;
-
+﻿using System.Net.Http.Headers;
+using Vladify.Frontend.models;
 namespace Vladify.Frontend.services;
 
 public class UserService(HttpClient client)
 {
-    public async Task<UserModel> GetUserByEmailAsync(string email)
+    public async Task<UserModel> GetCurrentUserAsync(string accessToken)
     {
-        var user = await client.GetFromJsonAsync<UserModel>($"{MyConstants.BaseApiUrl}/{email}");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        var user = await client.GetFromJsonAsync<UserModel>($"{MyConstants.BaseApiUrl}/api/users");
 
         return user!;
     }
