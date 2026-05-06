@@ -1,4 +1,5 @@
 ﻿@page
+@using Vladify.Frontend.models
 @model Vladify.Frontend.Pages.ProfileModel
 @{
     ViewData["Title"] = "Мой Профиль";
@@ -8,18 +9,16 @@
     <div class="row">
         <div class="col-md-4 text-center">
             <div class="profile-image-container mb-3">
-
                 @{
-                    var userPic = User.FindFirst("picture")?.Value;
+                    // Проверяем наличие фото в клаймах Auth0, иначе используем генератор аватарок
+                    var userPic = User.FindFirst("picture")?.Value
+                                 ?? $"https://ui-avatars.com/api/?name={Model.UserModel.Name}&size=300&background=74b9ff&color=fff";
                 }
-                @* Так как в модели нет ссылки на фото, генерируем заглушку по имени *@
-                <img src="@userPic" &size=300&background =74b9ff&color =fff"
+                <img src="@userPic"
                      class="img-fluid rounded-3 shadow-sm border"
                      alt="User Avatar" />
             </div>
-            <h4 class="fw-bold">@Model.UserModel.Name</h4>
             <p class="text-muted">@Model.UserModel.EmailAddress</p>
-            <button class="btn btn-outline-secondary btn-sm w-100 rounded-pill">Изменить фото</button>
         </div>
 
         <div class="col-md-8">
@@ -37,11 +36,6 @@
                             <span asp-validation-for="UserModel.Name" class="text-danger"></span>
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="UserModel.EmailAddress" class="form-label small fw-bold text-muted text-uppercase">Email</label>
-                            <input asp-for="UserModel.EmailAddress" class="form-control bg-light border-0" type="email" />
-                            <span asp-validation-for="UserModel.EmailAddress" class="text-danger"></span>
-                        </div>
                     </div>
 
                     <div class="row">
@@ -50,18 +44,13 @@
                             <input asp-for="UserModel.Age" class="form-control bg-light border-0" type="number" />
                         </div>
 
-                        <div class="col-md-8 mb-3">
+                       <div class="col-md-8 mb-3">
                             <label asp-for="UserModel.Gender" class="form-label small fw-bold text-muted text-uppercase">Пол</label>
-                            <select asp-for="UserModel.Gender" asp-items="Model.GenderOptions" class="form-select bg-light border-0">
+                            <select asp-for="UserModel.Gender" asp-items="Html.GetEnumSelectList<Gender>()" class="form-select bg-light border-0">
                             </select>
                         </div>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted text-uppercase">ID Аккаунта (Auth0)</label>
-                        <input class="form-control bg-light border-0" value="@Model.UserModel.ExternalId" readonly disabled />
-                        <div class="form-text">Этот идентификатор нельзя изменить вручную.</div>
-                    </div>
+                   
 
                     <hr class="my-4" />
 
@@ -73,7 +62,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
