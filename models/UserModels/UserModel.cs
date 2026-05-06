@@ -1,4 +1,4 @@
-﻿namespace Vladify.Frontend.models;
+﻿namespace Vladify.Frontend.models.UserModels;
 
 public class UserModel
 {
