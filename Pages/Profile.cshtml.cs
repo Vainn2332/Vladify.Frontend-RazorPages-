@@ -29,22 +29,18 @@ namespace Vladify.Frontend.Pages
 
             UserModel = await _userService.GetCurrentUserAsync(accessToken!, cancellationToken);
 
-            TempData["SuccessMessage"] = "Получили данные!";
         }
 
         public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
         {
             var accessToken = await HttpContext.GetTokenAsync("access_token");
 
-            if (!ModelState.IsValid)
-            {
-                return RedirectToPage();
-            }
-
             var updateRequest = _mapper.Map<UserUpdateRequestModel>(UserModel);
-            UserModel = await _userService.UpdateUserAsync(UserModel.Id, updateRequest, accessToken!, cancellationToken);
+            await _userService.UpdateUserAsync(UserModel.Id, updateRequest, accessToken!, cancellationToken);
 
-            return Page();
+            TempData["SuccessMessage"] = "Данные сохранены успешно!";
+
+            return RedirectToPage("Index");
         }
     }
 }
