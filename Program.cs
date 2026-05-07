@@ -1,4 +1,7 @@
 using Auth0.AspNetCore.Authentication;
+using AutoMapper;
+using Vladify.Frontend.Mappers;
+using Vladify.Frontend.services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,7 +9,7 @@ builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/");
 
-    options.Conventions.AllowAnonymousToPage("/Auth/Login");
+    options.Conventions.AllowAnonymousToPage("/Account/Login");
 });
 
 builder.Services.AddAuth0WebAppAuthentication(options =>
@@ -20,9 +23,22 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
     options.Audience = builder.Configuration["Auth0Options:ApiAudience"];
 });
 
+builder.Services.AddAutoMapper(cfg => { }, typeof(UserMapper).Assembly);
+
+
+
 builder.Services.AddHttpClient();
 
+builder.Services.AddScoped<UserService>();
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+
+    mapper.ConfigurationProvider.AssertConfigurationIsValid();
+}
 
 if (!app.Environment.IsDevelopment())
 {

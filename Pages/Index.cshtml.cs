@@ -1,20 +1,22 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Vladify.Frontend.services;
 
 namespace Vladify.Frontend.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
+        private readonly UserService _userService;
 
-        public IndexModel(ILogger<IndexModel> logger)
+        public IndexModel(UserService userService)
         {
-            _logger = logger;
+            _userService = userService;
         }
 
-        public void OnGet()
-        {
+        public string UserName { get; set; }
 
+        public async Task OnGetAsync()
+        {
+            UserName = User.Identity.Name;
         }
     }
 }

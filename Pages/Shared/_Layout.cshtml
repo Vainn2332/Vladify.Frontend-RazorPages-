@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Vladify.Frontend</title>
+    <title>@ViewData["Title"] Vladify</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -13,19 +13,33 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">Vladify.Frontend</a>
+                <a class="navbar-brand" asp-area="" asp-page="/Index">Vladify</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                        </li>
+                    </ul>
+
+                    @* Иконка профиля. Если данных нет (например, на странице Login), блок просто не будет мешать *@
+                    <ul class="navbar-nav">
+                        @{
+                            var userPic = User.FindFirst("picture")?.Value;
+                        }
+                    
+                        @if (!string.IsNullOrEmpty(userPic))
+                        {
+                            <li class="nav-item">
+                                <a asp-page="/Profile" class="d-flex align-items-center">
+                                    <img src="@userPic"
+                                         alt="Profile"
+                                         title="@User.Identity?.Name"
+                                         class="rounded-circle border"
+                                         style="width: 45px; height: 45px; object-fit: cover;" />
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -37,16 +51,37 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Vladify.Frontend - <a asp-area="" asp-page="/Privacy">Privacy</a>
-        </div>
-    </footer>
-
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <div id="toast-container"></div>
 
+    <script>
+            function showToast(message, type = 'success') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+        
+                toast.className = `vladify-toast ${type === 'success' ? 'toast-success' : 'toast-error'}`;
+                toast.innerHTML = `<span>${message}</span>`;
+
+                container.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.classList.add('toast-fade-out');
+                    setTimeout(() => toast.remove(), 300);
+                }, 4000);
+
+                toast.onclick = () => toast.remove();
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const successMsg = '@TempData["SuccessMessage"]';
+                const errorMsg = '@TempData["ErrorMessage"]';
+
+                if (successMsg) showToast(successMsg, 'success');
+                if (errorMsg) showToast(errorMsg, 'error');
+            });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

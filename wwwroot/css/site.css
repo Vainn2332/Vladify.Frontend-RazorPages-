@@ -29,3 +29,70 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+/* Контейнер для уведомлений */
+#toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+/* Базовый стиль уведомления */
+.vladify-toast {
+    min-width: 250px;
+    padding: 15px 20px;
+    margin-top: 10px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: slideIn 0.3s ease-out forwards;
+    cursor: pointer;
+}
+
+/* Цвета для разных статусов */
+.toast-success {
+    background-color: #55efc4;
+    color: #00b894;
+    border: 1px solid #00b894;
+}
+/* Мягкий зеленый */
+.toast-error {
+    background-color: #ff7675;
+    color: #d63031;
+    border: 1px solid #d63031;
+}
+/* Мягкий красный */
+
+/* Анимация появления */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Анимация исчезновения */
+.toast-fade-out {
+    animation: slideOut 0.3s ease-in forwards;
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
