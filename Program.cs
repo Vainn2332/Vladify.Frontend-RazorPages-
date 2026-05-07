@@ -1,5 +1,6 @@
 using Auth0.AspNetCore.Authentication;
-using Vladify.Frontend;
+using AutoMapper;
+using Vladify.Frontend.Mappers;
 using Vladify.Frontend.services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,21 +23,22 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
     options.Audience = builder.Configuration["Auth0Options:ApiAudience"];
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("DefaultPolicy", policy =>
-    {
-        policy.WithOrigins(MyConstants.BaseApiUrl)
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
+builder.Services.AddAutoMapper(cfg => { }, typeof(UserMapper).Assembly);
+
+
 
 builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<UserService>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+
+    mapper.ConfigurationProvider.AssertConfigurationIsValid();
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -48,8 +50,6 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseRouting();
-
-app.UseCors("DefaultPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
