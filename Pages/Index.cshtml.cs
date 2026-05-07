@@ -14,19 +14,30 @@ namespace Vladify.Frontend.Pages
 
         public IEnumerable<PlaylistModel> Playlists { get; set; } = [];
         public UserModel UserModel { get; set; }
-        public IndexModel(UserService userService)
+        public int CurrentPage { get; set; }
+
+
+        public IndexModel(UserService userService, PlaylistService playlistService)
         {
             _userService = userService;
+            _playlistService = playlistService;
         }
 
-        public async Task OnGetAsync([FromQuery] int pageNumber, CancellationToken cancellationToken, CancellationToken cancellationToken1)
+        public async Task<IActionResult> OnGetAsync(CancellationToken cancellationToken, [FromQuery] int pageNumber = 1)
         {
+            CurrentPage = pageNumber < 1 ? 1 : pageNumber;
+
             var accessToken = await HttpContext.GetTokenAsync("access_token");
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return RedirectToPage("/Account/Login");
+            }
 
-            UserModel = await _userService.GetCurrentUserAsync(accessToken, cancellationToken);
 
-            var paginationFilter = new PaginationFilter(pageNumber);
-            Playlists = await _playlistService.GetPlaylistsOfUserAsync(UserModel.Id, paginationFilter, accessToken, cancellationToken);
+            var paginationFilter = new PaginationFilter(CurrentPage);
+            Playlists = await _playlistService.GetPlaylistsOfCurrentUserAsync(paginationFilter, accessToken, cancellationToken);
+
+            return Page();
         }
     }
 }
