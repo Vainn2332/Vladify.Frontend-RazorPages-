@@ -54,7 +54,34 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <div id="toast-container"></div>
 
+    <script>
+            function showToast(message, type = 'success') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+        
+                toast.className = `vladify-toast ${type === 'success' ? 'toast-success' : 'toast-error'}`;
+                toast.innerHTML = `<span>${message}</span>`;
+
+                container.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.classList.add('toast-fade-out');
+                    setTimeout(() => toast.remove(), 300);
+                }, 4000);
+
+                toast.onclick = () => toast.remove();
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const successMsg = '@TempData["SuccessMessage"]';
+                const errorMsg = '@TempData["ErrorMessage"]';
+
+                if (successMsg) showToast(successMsg, 'success');
+                if (errorMsg) showToast(errorMsg, 'error');
+            });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

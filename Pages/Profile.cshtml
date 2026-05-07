@@ -106,4 +106,16 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            $('form').bind('invalid-form.validate', function () {
+                if (typeof showToast === "function") {
+                    showToast("Проверьте правильность заполнения полей", "error");
+                } else {
+                    console.log("Ошибки в форме, но функция showToast не найдена");
+                }
+            });
+        });
+    </script>
 }
