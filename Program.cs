@@ -17,10 +17,14 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
     options.Domain = builder.Configuration["Auth0Options:Domain"]!;
     options.ClientId = builder.Configuration["Auth0Options:ClientID"]!;
     options.ClientSecret = builder.Configuration["Auth0Options:ClientSecret"];
+
+    options.Scope = "openid profile email offline_access";
 })
 .WithAccessToken(options =>
 {
     options.Audience = builder.Configuration["Auth0Options:ApiAudience"];
+
+    options.UseRefreshTokens = true;
 });
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(UserMapper).Assembly);
@@ -30,6 +34,7 @@ builder.Services.AddAutoMapper(cfg => { }, typeof(UserMapper).Assembly);
 builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<PlaylistService>();
 
 var app = builder.Build();
 
