@@ -5,5 +5,10 @@
 }
 
 <div class="text-center">
-    <h1> Hello, @Model.UserName</h1>
+    <p> плейлисты:</p>
+    @foreach (var playlist in Model.Playlists)
+    {
+        <p> название :@playlist.Name</p>
+        <p> Автор: @playlist.AuthorName</p>
+    }
 </div>

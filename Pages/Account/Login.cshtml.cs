@@ -13,7 +13,7 @@ public class LoginModel : PageModel
     {
         if (User.Identity?.IsAuthenticated == true)
         {
-            return RedirectToPage("/Index");
+            //return RedirectToPage("/Index");
         }
         return Page();
     }
