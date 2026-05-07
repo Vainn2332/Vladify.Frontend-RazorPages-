@@ -65,26 +65,26 @@
                 <h5 class="mb-4 fw-bold text-primary">Настройки профиля</h5>
                 
                 <form method="post">
-                    <input type="hidden" asp-for="UserModel.Id" />
+                    <input type="hidden" asp-for="UserModel.Id" />  
                     <input type="hidden" asp-for="UserModel.ExternalId" />
                     <input type="hidden" asp-for="UserModel.EmailAddress" />
 
                     <div class="row g-3">
                         <div class="col-12">
-                            <label asp-for="UserUpdateRequestModel.Name" class="form-label small fw-bold text-muted text-uppercase">Имя пользователя</label>
-                            <input asp-for="UserUpdateRequestModel.Name" class="form-control form-control-lg bg-light" placeholder="Введите имя..." />
-                            <span asp-validation-for="UserUpdateRequestModel.Name" class="text-danger small"></span>
+                            <label asp-for="UserModel.Name" class="form-label small fw-bold text-muted text-uppercase">Имя пользователя</label>
+                            <input asp-for="UserModel.Name" class="form-control form-control-lg bg-light" placeholder="Введите имя..." />
+                            <span asp-validation-for="UserModel.Name" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
-                            <label asp-for="UserUpdateRequestModel.Age" class="form-label small fw-bold text-muted text-uppercase">Возраст</label>
-                            <input asp-for="UserUpdateRequestModel.Age" class="form-control form-control-lg bg-light" type="number" min="1" max="120" />
-                            <span asp-validation-for="UserUpdateRequestModel.Age" class="text-danger small"></span>
+                            <label asp-for="UserModel.Age" class="form-label small fw-bold text-muted text-uppercase">Возраст</label>
+                            <input asp-for="UserModel.Age" class="form-control form-control-lg bg-light" type="number" min="1" max="120" />
+                            <span asp-validation-for="UserModel.Age" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6">
-                            <label asp-for="UserUpdateRequestModel.Gender" class="form-label small fw-bold text-muted text-uppercase">Пол</label>
-                            <select asp-for="UserUpdateRequestModel.Gender"
+                            <label asp-for="UserModel.Gender" class="form-label small fw-bold text-muted text-uppercase">Пол</label>
+                            <select asp-for="UserModel.Gender"
                                     asp-items="Html.GetEnumSelectList<Gender>()"
                                     class="form-select form-control-lg bg-light">
                             </select>

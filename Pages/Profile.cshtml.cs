@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -10,34 +11,38 @@ namespace Vladify.Frontend.Pages
     {
         private readonly UserService _userService;
         private readonly HttpClient _httpClient;
+        private readonly IMapper _mapper;
 
-        public ProfileModel(UserService userService, HttpClient httpClient)
+        public ProfileModel(UserService userService, HttpClient httpClient, IMapper mapper)
         {
             _userService = userService;
             _httpClient = httpClient;
+            _mapper = mapper;
         }
 
         [BindProperty]
-        public UserUpdateRequestModel UserUpdateRequestModel { get; set; }
         public UserModel UserModel { get; set; }
-
 
         public async Task OnGetAsync(CancellationToken cancellationToken)
         {
             var accessToken = await HttpContext.GetTokenAsync("access_token");
 
-            UserModel = await _userService.GetCurrentUserAsync(accessToken, cancellationToken);
+            UserModel = await _userService.GetCurrentUserAsync(accessToken!, cancellationToken);
+
+            TempData["SuccessMessage"] = "Получили данные!";
         }
 
         public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
         {
+            var accessToken = await HttpContext.GetTokenAsync("access_token");
+
             if (!ModelState.IsValid)
             {
                 return RedirectToPage();
             }
 
-            var accessToken = await HttpContext.GetTokenAsync("access_token");
-            UserModel = await _userService.UpdateUserAsync(UserModel.Id, UserUpdateRequestModel, accessToken, cancellationToken);
+            var updateRequest = _mapper.Map<UserUpdateRequestModel>(UserModel);
+            UserModel = await _userService.UpdateUserAsync(UserModel.Id, updateRequest, accessToken!, cancellationToken);
 
             return Page();
         }
