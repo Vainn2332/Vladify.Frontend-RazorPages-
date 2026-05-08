@@ -1,0 +1,162 @@
+﻿@page "{playlistId:guid}"
+@model Vladify.Frontend.Pages.PlaylistDetailsModel
+@{
+    ViewData["Title"] = Model.PlaylistModel?.Name ?? "Плейлист";
+}
+
+<div class="playlist-container">
+    @if (Model.PlaylistModel == null)
+    {
+        <div class="alert alert-warning">Плейлист не найден.</div>
+    }
+    else
+    {
+        <div class="playlist-header">
+            <h1>@Model.PlaylistModel.Name</h1>
+            <p class="author">Автор плейлиста: @Model.PlaylistModel.AuthorName</p>
+        </div>
+
+        <div class="songs-section">
+            <h2>Треки (@Model.PlaylistModel.Songs.Count)</h2>
+            @if (!Model.PlaylistModel.Songs.Any())
+            {
+                <p class="text-muted">В этом плейлисте пока нет песен.</p>
+            }
+            else
+            {
+                <ul class="songs-list">
+                    @foreach (var song in Model.PlaylistModel.Songs)
+                    {
+                        <li class="song-item">
+                            <div class="song-info">
+                                <strong>@song.Title</strong>
+                                <span class="artist">@song.Author</span>
+                                <span class="album">Альбом: @song.Album</span>
+                            </div>
+                            <div class="song-duration">
+                                @FormatDuration(song.Duration)
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="navigation">
+            <a asp-page="/Index" class="btn-back">← Назад к плейлистам</a>
+        </div>
+    }
+</div>
+
+@functions {
+    private string FormatDuration(TimeSpan duration)
+    {
+        if (duration.TotalHours >= 1)
+            return duration.ToString(@"hh\:mm\:ss");
+        return duration.ToString(@"mm\:ss");
+    }
+}
+
+<style>
+    .playlist-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 1rem;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .playlist-header {
+        border-bottom: 2px solid #eaecef;
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+        .playlist-header h1 {
+            margin-bottom: 0.25rem;
+            font-size: 2rem;
+        }
+
+    .author {
+        color: #586069;
+        font-size: 1.1rem;
+    }
+
+    .songs-section h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .songs-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .song-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .song-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+        .song-info strong {
+            font-size: 1rem;
+        }
+
+    .artist {
+        font-size: 0.85rem;
+        color: #6a737d;
+    }
+
+    .album {
+        font-size: 0.8rem;
+        color: #8a8d91;
+    }
+
+    .song-duration {
+        font-size: 0.85rem;
+        color: #6a737d;
+        font-family: monospace;
+        margin-left: 1rem;
+    }
+
+    .btn-back {
+        display: inline-block;
+        margin-top: 2rem;
+        padding: 0.5rem 1rem;
+        background-color: #f6f8fa;
+        border: 1px solid #d1d5da;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #24292e;
+        transition: 0.2s;
+    }
+
+        .btn-back:hover {
+            background-color: #e1e4e8;
+            border-color: #c6cbd1;
+        }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+    }
+
+    .alert-warning {
+        background-color: #fff5b1;
+        border-left: 4px solid #f0ad4e;
+        color: #8a6d3b;
+    }
+
+    .text-muted {
+        color: #6c757d;
+        font-style: italic;
+    }
+</style>
