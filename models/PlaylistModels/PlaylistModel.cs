@@ -1,4 +1,4 @@
-﻿namespace Vladify.Frontend.models;
+﻿namespace Vladify.Frontend.models.PlaylistModels;
 
 public class PlaylistModel
 {

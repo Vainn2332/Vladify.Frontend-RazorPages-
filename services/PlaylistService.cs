@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using Vladify.Frontend.models;
+using Vladify.Frontend.models.PlaylistModels;
 
 namespace Vladify.Frontend.services;
 
@@ -21,4 +22,22 @@ public class PlaylistService(HttpClient client)
 
         return playlist;
     }
+
+    public async Task<PlaylistModel> AddNewPlaylistAsync(PlaylistAddRequestModel playlistAddRequestModel, string accessToken, CancellationToken cancellationToken)
+    {
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+        var response = await client.PostAsJsonAsync($"{MyConstants.BaseApiUrl}/api/playlists", playlistAddRequestModel, cancellationToken);
+        if (response.IsSuccessStatusCode)
+        {
+            var newPlaylist = await response.Content.ReadFromJsonAsync<PlaylistModel>();
+            return newPlaylist!;
+        }
+        else
+        {
+            var error = await response.Content.ReadFromJsonAsync<ErrorDetails>();
+            throw new Exception($"{error?.ErrorTitle}\n{error?.ErrorMessage}");
+        }
+    }
+
 }
