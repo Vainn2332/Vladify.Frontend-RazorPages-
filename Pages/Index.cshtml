@@ -27,12 +27,10 @@
         background: linear-gradient(135deg, #FF9A8B 0%, #FF6A88 55%, #FF99AC 100%);
     }
     /* Розовый */
-    
-    /* НОВЫЙ grad-2: Вместо светлого зеленого теперь Солнечный Оранжевый */
     .grad-2 {
         background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
     }
-    
+    /* Солнечный Оранжевый */
     .grad-3 {
         background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
     }
@@ -49,6 +47,26 @@
         background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     }
     /* Лазурный */
+
+    /* НОВАЯ ГАРМОНИЧНАЯ КНОПКА (Мятная) */
+    .btn-vladify-create {
+        background: linear-gradient(135deg, #41d3b7 0%, #27b89d 100%);
+        color: white;
+        border: none;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+        .btn-vladify-create:hover {
+            background: linear-gradient(135deg, #51e3c7 0%, #2cccae 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 184, 157, 0.3) !important;
+        }
+
+        .btn-vladify-create:active {
+            transform: translateY(0);
+        }
 
     .playlists-grid-container {
         min-height: 540px;
@@ -72,10 +90,10 @@
 </style>
 
 <div class="container-fluid px-4 mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold h4">Мои плейлисты</h2>
-        <a asp-page="/Playlists/Create" class="btn btn-primary rounded-pill px-4 shadow-sm btn-sm">
-            <i class="bi bi-plus-lg me-2"></i>Создать
+    <div class="d-flex align-items-center mb-4 gap-3">
+        <h2 class="fw-bold h4 mb-0">Мои плейлисты</h2>
+        <a asp-page="CreatePlaylist" class="btn btn-vladify-create rounded-pill px-4 shadow-sm btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Создать
         </a>
     </div>
 
@@ -100,9 +118,7 @@
 
                     <div class="col">
                         <div class="card h-100 border-0 shadow-sm playlist-card rounded-4 overflow-hidden">
-                            <div class="playlist-cover-placeholder @gradClass d-flex align-items-center justify-content-center">
-                                <i class="bi bi-vinyl fs-1 text-white opacity-40"></i>
-                            </div>
+                            <div class="playlist-cover-placeholder @gradClass"></div>
                             
                             <div class="card-body">
                                 <a asp-page="Playlists" asp-route-id="@playlist.Id" class="stretched-link text-decoration-none">
