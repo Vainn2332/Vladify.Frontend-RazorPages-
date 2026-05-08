@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Vladify.Frontend.models.PlaylistModels;
 using Vladify.Frontend.services;
 
 namespace Vladify.Frontend.Pages;
 
-public class PlaylistsModel(PlaylistService _playlistService) : PageModel
+public class PlaylistsModel(PlaylistService playlistService) : PageModel
 {
     public PlaylistModel PlaylistModel { get; set; }
 
@@ -13,6 +14,26 @@ public class PlaylistsModel(PlaylistService _playlistService) : PageModel
     {
         var accessToken = await HttpContext.GetTokenAsync("access_token");
 
-        PlaylistModel = await _playlistService.GetPlaylistByIdAsync(id, accessToken, cancellationToken);
+        PlaylistModel = await playlistService.GetPlaylistByIdAsync(id, accessToken, cancellationToken);
+    }
+
+    public async Task<IActionResult> OnPostRemoveSongAsync(Guid id, Guid songId, CancellationToken cancellationToken)
+    {
+        var accessToken = await HttpContext.GetTokenAsync("access_token");
+
+        try
+        {
+            await playlistService.DeleteSongFromPlaylistAsync(id, songId, accessToken, cancellationToken);
+
+            TempData["SuccessMessage"] = "Песня успешно удалена!";
+
+            return RedirectToPage(new { id = id });
+        }
+        catch
+        {
+            TempData["ErrorMessage"] = "что-то пошло не так";
+
+            return RedirectToPage(new { id = id });
+        }
     }
 }
