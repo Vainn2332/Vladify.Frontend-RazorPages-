@@ -12,4 +12,13 @@ public class PlaylistService(HttpClient client)
 
         return playlists;
     }
+
+    public async Task<PlaylistModel> GetPlaylistByIdAsync(Guid playlistId, string accessToken, CancellationToken cancellationToken)
+    {
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+        var playlist = await client.GetFromJsonAsync<PlaylistModel>($"{MyConstants.BaseApiUrl}/api/playlists/{playlistId}");
+
+        return playlist;
+    }
 }
