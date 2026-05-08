@@ -1,7 +1,7 @@
 ﻿@page "{id:guid}"
 @model Vladify.Frontend.Pages.PlaylistsModel
 @{
-    ViewData["Title"] = Model.PlaylistModel?.Name ?? "Плейлист";
+    ViewData["Title"] = null;
 }
 
 <div class="container-fluid px-4 mt-5">
@@ -112,24 +112,20 @@
 <style>
     :root {
         --accent-color: #74b9ff;
-        
-        /* НОВЫЕ МЯТНЫЕ ГРАДИЕНТЫ НА ОСНОВЕ #27b89d */
         --vladify-btn-grad: linear-gradient(135deg, #41d3b7 0%, #27b89d 100%);
         --vladify-btn-hover: linear-gradient(135deg, #51e3c7 0%, #2cccae 100%);
     }
 
-    /* Hero Section */
     .playlist-hero-cover {
         width: 170px;
         height: 170px;
     }
 
-    /* Новая Кнопка */
     .btn-vladify-play {
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: var(--vladify-btn-grad); /* Применили новый градиент */
+        background: var(--vladify-btn-grad); 
         border: none;
         display: flex;
         align-items: center;
@@ -138,20 +134,17 @@
         position: relative;
     }
 
-    /* Embedded Play/Pause symbols */
     .vladify-play-svg {
         display: none; 
         width: 40px; 
         height: 40px;
     }
 
-    /* Центрирование символа воспроизведения (Play) */
     .btn-vladify-play.paused .vladify-symbol-paused {
         display: block;
         margin-left: 5px; 
     }
 
-    /* Показать символ паузы (Pause) */
     .btn-vladify-play.playing .vladify-symbol-playing {
         display: block;
     }
@@ -159,7 +152,6 @@
     .btn-vladify-play:hover {
         transform: scale(1.1);
         background: var(--vladify-btn-hover);
-        /* Тень теперь тоже мятная (RGB от твоего #27b89d) */
         box-shadow: 0 8px 20px rgba(39, 184, 157, 0.4) !important;
     }
 
@@ -167,13 +159,11 @@
         transform: scale(0.95);
     }
 
-    /* Остальные элементы */
     .btn-icon-secondary {
         background: none; border: none; color: #6a737d; font-size: 1.6rem;
         transition: all 0.2s;
     }
     
-    /* При наведении иконки тоже становятся мятными */
     .btn-icon-secondary:hover { color: #27b89d; transform: scale(1.1); }
 
     .custom-table thead th { border-bottom: none; font-size: 0.7rem; color: #adb5bd; }
@@ -191,7 +181,6 @@
     .text-accent { color: var(--accent-color); }
     .mono { font-family: 'SFMono-Regular', Consolas, monospace; letter-spacing: -0.5px; }
 
-    /* Те же градиенты, что на главной для обложки */
     .grad-4 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
 
     .alert-soft-warning {
