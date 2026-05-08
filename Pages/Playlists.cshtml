@@ -121,8 +121,10 @@
 <style>
     :root {
         --accent-color: #74b9ff;
-        --vladify-purple-grad: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
-        --vladify-purple-hover: linear-gradient(135deg, #b2a8ff 0%, #7d6dfa 100%);
+        
+        /* НОВЫЕ МЯТНЫЕ ГРАДИЕНТЫ НА ОСНОВЕ #27b89d */
+        --vladify-btn-grad: linear-gradient(135deg, #41d3b7 0%, #27b89d 100%);
+        --vladify-btn-hover: linear-gradient(135deg, #51e3c7 0%, #2cccae 100%);
     }
 
     /* Hero Section */
@@ -136,7 +138,7 @@
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: var(--vladify-purple-grad);
+        background: var(--vladify-btn-grad); /* Применили новый градиент */
         border: none;
         display: flex;
         align-items: center;
@@ -147,15 +149,15 @@
 
     /* Embedded Play/Pause symbols */
     .vladify-play-svg {
-        display: none; /* Скрыть по умолчанию */
-        width: 40px; /* Увеличьте размер символа */
+        display: none; 
+        width: 40px; 
         height: 40px;
     }
 
     /* Центрирование символа воспроизведения (Play) */
     .btn-vladify-play.paused .vladify-symbol-paused {
         display: block;
-        margin-left: 5px; /* Визуальное центрирование */
+        margin-left: 5px; 
     }
 
     /* Показать символ паузы (Pause) */
@@ -164,9 +166,10 @@
     }
 
     .btn-vladify-play:hover {
-        transform: scale(1.1) ;
-        background: var(--vladify-purple-hover);
-        box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4) !important;
+        transform: scale(1.1);
+        background: var(--vladify-btn-hover);
+        /* Тень теперь тоже мятная (RGB от твоего #27b89d) */
+        box-shadow: 0 8px 20px rgba(39, 184, 157, 0.4) !important;
     }
 
     .btn-vladify-play:active {
@@ -178,7 +181,9 @@
         background: none; border: none; color: #6a737d; font-size: 1.6rem;
         transition: all 0.2s;
     }
-    .btn-icon-secondary:hover { color: #6c5ce7; transform: scale(1.1); }
+    
+    /* При наведении иконки тоже становятся мятными */
+    .btn-icon-secondary:hover { color: #27b89d; transform: scale(1.1); }
 
     .custom-table thead th { border-bottom: none; font-size: 0.7rem; color: #adb5bd; }
     .song-row { cursor: pointer; transition: background-color 0.2s; }
