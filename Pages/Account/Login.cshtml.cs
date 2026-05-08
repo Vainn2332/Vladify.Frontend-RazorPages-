@@ -11,10 +11,6 @@ public class LoginModel : PageModel
 {
     public IActionResult OnGet()
     {
-        if (User.Identity?.IsAuthenticated == true)
-        {
-            return RedirectToPage("/Index");
-        }
         return Page();
     }
 

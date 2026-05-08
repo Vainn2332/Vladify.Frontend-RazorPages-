@@ -3,4 +3,6 @@
 public static class MyConstants
 {
     public const string BaseApiUrl = "https://localhost:7161";
+
+    public const int PlaylistsPaginationPageSize = 10;
 }

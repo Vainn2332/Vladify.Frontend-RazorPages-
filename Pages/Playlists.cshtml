@@ -1,0 +1,206 @@
+﻿@page "{id:guid}"
+@model Vladify.Frontend.Pages.PlaylistsModel
+@{
+    ViewData["Title"] = Model.PlaylistModel?.Name ?? "Плейлист";
+}
+
+<div class="container-fluid px-4 mt-5">
+    @if (Model.PlaylistModel == null)
+    {
+        <div class="alert alert-soft-warning d-flex align-items-center rounded-4 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+            <div>Плейлист не найден.</div>
+        </div>
+        <a asp-page="/Index" class="btn btn-light rounded-pill mt-3">← Назад к медиатеке</a>
+    }
+    else
+    {
+        <div class="row align-items-center mb-4">
+            <div class="col-auto">
+                <div class="playlist-hero-cover grad-purple shadow-lg rounded-4 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-music-note-beamed text-white display-1 opacity-50"></i>
+                </div>
+            </div>
+            <div class="col">
+                <h1 class="display-4 fw-bold mb-1 mt-0">@Model.PlaylistModel.Name</h1>
+                <div class="d-flex align-items-center text-muted">
+                    <span class="fw-bold text-dark">@Model.PlaylistModel.AuthorName</span>
+                    <span class="mx-2">•</span>
+                    <span>@Model.PlaylistModel.Songs.Count треков</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center mb-4 gap-4">
+            <button class="btn-vladify-play paused shadow-lg" onclick="togglePlayMain(this)">
+                <svg class="vladify-play-svg vladify-symbol-paused" viewBox="0 0 16 16" width="40" height="40">
+                  <path fill="black" d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+                </svg>
+                <svg class="vladify-play-svg vladify-symbol-playing" viewBox="0 0 16 16" width="40" height="40">
+                  <path fill="black" d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/>
+                </svg>
+            </button>
+            
+            <button class="btn-icon-secondary" title="Добавить в любимое">
+                <i class="bi bi-heart"></i>
+            </button>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-5">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 custom-table">
+                    <thead class="bg-light text-muted small text-uppercase fw-bold">
+                        <tr>
+                            <th class="ps-4 py-3" style="width: 50px;">#</th>
+                            <th>Название</th>
+                            <th>Альбом</th>
+                            <th class="text-end pe-4"><i class="bi bi-clock"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ int i = 1; }
+                        @foreach (var song in Model.PlaylistModel.Songs)
+                        {
+                            <tr class="song-row">
+                                <td class="ps-4 text-muted">@i</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="song-icon-placeholder me-3 rounded shadow-sm d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-music-note text-accent"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold song-title">@song.Title</div>
+                                            <div class="text-muted small">@song.Author</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-muted small">@song.Album</td>
+                                <td class="text-end pe-4 text-muted small mono">
+                                    @FormatDuration(song.Duration)
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (!Model.PlaylistModel.Songs.Any())
+            {
+                <div class="text-center py-5">
+                    <p class="text-muted fs-5">В этом плейлисте пока нет песен.</p>
+                </div>
+            }
+        </div>
+
+        <div class="mb-5">
+            <a asp-page="/Index" class="btn btn-link text-muted text-decoration-none p-0">
+                <i class="bi bi-arrow-left me-2"></i>К плейлистам
+            </a>
+        </div>
+    }
+</div>
+
+@functions {
+    private string FormatDuration(TimeSpan duration)
+    {
+        if (duration.TotalHours >= 1)
+            return duration.ToString(@"hh\:mm\:ss");
+        return duration.ToString(@"mm\:ss");
+    }
+}
+
+@section Scripts {
+    <script>
+        function togglePlayMain(button) {
+            button.classList.toggle('playing');
+            button.classList.toggle('paused');
+        }
+    </script>
+}
+
+<style>
+    :root {
+        --accent-color: #74b9ff;
+        --vladify-purple-grad: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+        --vladify-purple-hover: linear-gradient(135deg, #b2a8ff 0%, #7d6dfa 100%);
+    }
+
+    /* Hero Section */
+    .playlist-hero-cover {
+        width: 170px;
+        height: 170px;
+    }
+
+    /* Новая Кнопка */
+    .btn-vladify-play {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--vladify-purple-grad);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+    }
+
+    /* Embedded Play/Pause symbols */
+    .vladify-play-svg {
+        display: none; /* Скрыть по умолчанию */
+        width: 40px; /* Увеличьте размер символа */
+        height: 40px;
+    }
+
+    /* Центрирование символа воспроизведения (Play) */
+    .btn-vladify-play.paused .vladify-symbol-paused {
+        display: block;
+        margin-left: 5px; /* Визуальное центрирование */
+    }
+
+    /* Показать символ паузы (Pause) */
+    .btn-vladify-play.playing .vladify-symbol-playing {
+        display: block;
+    }
+
+    .btn-vladify-play:hover {
+        transform: scale(1.1) ;
+        background: var(--vladify-purple-hover);
+        box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4) !important;
+    }
+
+    .btn-vladify-play:active {
+        transform: scale(0.95);
+    }
+
+    /* Остальные элементы */
+    .btn-icon-secondary {
+        background: none; border: none; color: #6a737d; font-size: 1.6rem;
+        transition: all 0.2s;
+    }
+    .btn-icon-secondary:hover { color: #6c5ce7; transform: scale(1.1); }
+
+    .custom-table thead th { border-bottom: none; font-size: 0.7rem; color: #adb5bd; }
+    .song-row { cursor: pointer; transition: background-color 0.2s; }
+    .song-row:hover { background-color: rgba(116, 185, 255, 0.05) !important; }
+    .song-row:hover .song-title { color: var(--accent-color); }
+
+    .song-icon-placeholder {
+        width: 38px;
+        height: 38px;
+        background-color: #f8f9fa;
+        border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    .text-accent { color: var(--accent-color); }
+    .mono { font-family: 'SFMono-Regular', Consolas, monospace; letter-spacing: -0.5px; }
+
+    /* Те же градиенты, что на главной для обложки */
+    .grad-4 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+
+    .alert-soft-warning {
+        background-color: #fff9db;
+        border: 1px solid #ffec99;
+        color: #f08c00;
+    }
+</style>
