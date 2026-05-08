@@ -46,40 +46,51 @@
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-5">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0 custom-table">
-                    <thead class="bg-light text-muted small text-uppercase fw-bold">
-                        <tr>
-                            <th class="ps-4 py-3" style="width: 50px;">#</th>
-                            <th>Название</th>
-                            <th>Альбом</th>
-                            <th class="text-end pe-4"><i class="bi bi-clock"></i></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @{ int i = 1; }
-                        @foreach (var song in Model.PlaylistModel.Songs)
-                        {
-                            <tr class="song-row">
-                                <td class="ps-4 text-muted">@i</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="song-icon-placeholder me-3 rounded shadow-sm d-flex align-items-center justify-content-center">
-                                            <i class="bi bi-music-note text-accent"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold song-title">@song.Title</div>
-                                            <div class="text-muted small">@song.Author</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="text-muted small">@song.Album</td>
-                                <td class="text-end pe-4 text-muted small mono">
-                                    @FormatDuration(song.Duration)
-                                </td>
-                            </tr>
-                            i++;
-                        }
-                    </tbody>
-                </table>
+    <thead class="bg-light text-muted small text-uppercase fw-bold">
+        <tr>
+            <th class="ps-4 py-3" style="width: 50px;">#</th>
+            <th>Название</th>
+            <th>Альбом</th>
+            <th class="text-end"><i class="bi bi-clock"></i></th>
+            <th class="text-end pe-4" style="width: 50px;"></th> </tr>
+    </thead>
+    <tbody>
+        @{ int i = 1; }
+        @foreach (var song in Model.PlaylistModel.Songs)
+        {
+
+            <tr class="song-row">
+                <td class="ps-4 text-muted">@i</td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="song-icon-placeholder me-3 rounded shadow-sm d-flex align-items-center justify-content-center">
+                            <i class="bi bi-music-note text-accent"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold song-title">@song.Title</div>
+                            <div class="text-muted small">@song.Author</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="text-muted small">@song.Album</td>
+                <td class="text-end text-muted small mono">
+                    @FormatDuration(song.Duration)
+                </td>
+                <td class="text-end pe-4">
+                    <form method="post"
+                        asp-page-handler="RemoveSong"
+                        asp-route-songId="@song.Id"
+                        asp-route-id = "@Model.PlaylistModel.Id">
+                        <button type="submit" class="btn-delete-song" title="Удалить">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            i++;
+        }
+    </tbody>
+</table>
             </div>
             @if (!Model.PlaylistModel.Songs.Any())
             {
@@ -187,5 +198,25 @@
         background-color: #fff9db;
         border: 1px solid #ffec99;
         color: #f08c00;
+    }
+    .btn-delete-song {
+        background: none;
+        border: none;
+        color: #adb5bd;
+        transition: all 0.2s ease;
+        padding: 5px;
+        border-radius: 8px;
+    }
+
+    .btn-delete-song:hover {
+        color: #ff4757; /* Красный цвет при наведении */
+        background-color: rgba(255, 71, 87, 0.1);
+        transform: scale(1.1);
+    }
+
+    /* Чтобы кнопка удаления не мешала нажатию на строку, если вы планируете вешать клик на всю строку */
+    .btn-delete-song {
+        position: relative;
+        z-index: 2;
     }
 </style>
