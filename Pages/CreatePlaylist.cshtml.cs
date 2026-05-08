@@ -27,7 +27,7 @@ namespace Vladify.Frontend.Pages
             {
                 TempData["ErrorMessage"] = "что-то пошло не так";
 
-                return Page();
+                return RedirectToPage("/Index");
             }
         }
     }
