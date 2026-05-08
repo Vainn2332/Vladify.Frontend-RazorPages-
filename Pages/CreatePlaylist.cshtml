@@ -19,11 +19,10 @@
 
         .form-control-vladify:focus {
             background-color: #fff;
-            border-color: #41d3b7; /* Мятный цвет под кнопку */
+            border-color: #41d3b7;
             box-shadow: 0 0 0 0.25rem rgba(65, 211, 183, 0.2);
         }
 
-    /* Та самая гармоничная мятная кнопка */
     .btn-vladify-create {
         background: linear-gradient(135deg, #41d3b7 0%, #27b89d 100%);
         color: white;
@@ -38,32 +37,17 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(39, 184, 157, 0.3) !important;
         }
-    
-    .icon-wrapper {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-        box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
-    }
 </style>
 
-<div class="container mt-5 pt-4">
+<div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-5">
-            <div class="card create-card border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="col-md-6 col-lg-4">
+            <div class="card create-card border-0 shadow-sm rounded-4 overflow-hidden">
                 
-                <div class="card-body p-5">
+                <div class="card-body p-4">
                     <div class="text-center mb-4">
-                        <div class="icon-wrapper mb-3">
-                            <i class="bi bi-music-note-list fs-1 text-muted"></i>
-                        </div>
-                        <h3 class="fw-bold text-dark">Создать плейлист</h3>
-                        <p class="text-muted small">Дайте имя вашей новой музыкальной подборке</p>
+                        <h4 class="fw-bold text-dark mt-2">Создать плейлист</h4>
+                        <p class="text-muted small mb-0">Дайте имя вашей новой музыкальной подборке</p>
                     </div>
 
                     <form method="post">
@@ -72,18 +56,18 @@
                                 Название <span class="text-danger">*</span>
                             </label>
                             <input asp-for="PlaylistAddRequestModel.Name"
-                                   class="form-control form-control-lg form-control-vladify rounded-4 px-3"
+                                   class="form-control form-control-vladify rounded-4 px-3 py-2"
                                    placeholder="Например, Для тренировки..."
                                    autocomplete="off"
                                    autofocus />
                             <span asp-validation-for="PlaylistAddRequestModel.Name" class="text-danger small ms-1 mt-1 d-block"></span>
                         </div>
 
-                        <div class="d-grid gap-3 mt-5">
-                            <button type="submit" class="btn btn-vladify-create btn-lg rounded-pill shadow-sm">
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-vladify-create rounded-pill shadow-sm py-2">
                                 Сохранить
                             </button>
-                            <a asp-page="/Index" class="btn btn-light btn-lg rounded-pill text-muted border-0">
+                            <a asp-page="/Index" class="btn btn-light rounded-pill text-muted border-0 py-2">
                                 Отмена
                             </a>
                         </div>
