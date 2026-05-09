@@ -51,13 +51,11 @@
     </div>
 
     <div class="mt-3">
-        <form method="post" asp-page-handler="DeletePlaylist" asp-route-id="@Model.PlaylistModel.Id" 
-              onsubmit="return confirm('Вы уверены, что хотите полностью удалить этот плейлист? Это действие невозможно отменить.');">
-            <button type="submit" class="btn btn-delete-playlist-main btn-sm rounded-pill px-3">
-                <i class="bi bi-trash3 me-2"></i>Удалить плейлист
-            </button>
-        </form>
-    </div>
+    <button type="button" class="btn btn-delete-playlist-main btn-sm rounded-pill px-3" 
+            data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+        <i class="bi bi-trash3 me-2"></i>Удалить плейлист
+    </button>
+</div>
 </div>
         </div>
 
@@ -130,6 +128,35 @@
             }
         </div>
     }
+
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <i class="bi bi-exclamation-circle display-3 opacity-75" style="color: #cca4a4;"></i>
+                </div>
+                
+                <h4 class="fw-bold mb-2">Удалить плейлист?</h4>
+                <p class="text-muted mb-4">
+                   Вы уверены, что хотите удалить плейлист 
+                   <strong>@Model.PlaylistModel!.Name</strong>
+                </p>
+
+                <div class="d-grid gap-2">
+                    <form method="post" asp-page-handler="DeletePlaylist" asp-route-id="@Model.PlaylistModel.Id">
+                        <button type="submit" class="btn btn-soft-confirm w-100 rounded-pill py-2 fw-bold">
+                            Да, удалить плейлист
+                        </button>
+                    </form>
+                    <button type="button" class="btn btn-light w-100 rounded-pill py-2 text-muted shadow-none" data-bs-dismiss="modal">
+                        Отмена
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 
 @functions {
@@ -155,7 +182,6 @@
             if (form.classList.contains('d-none')) {
                 container.classList.add('d-none');
                 form.classList.remove('d-none');
-                // Ставим фокус в инпут для удобства
                 form.querySelector('input').focus();
             } else {
                 container.classList.remove('d-none');
@@ -253,14 +279,11 @@
         padding: 5px;
         border-radius: 8px;
     }
-
     .btn-delete-song:hover {
-        color: #ff4757; /* Красный цвет при наведении */
+        color: #ff4757; 
         background-color: rgba(255, 71, 87, 0.1);
         transform: scale(1.1);
     }
-
-    /* Чтобы кнопка удаления не мешала нажатию на строку, если вы планируете вешать клик на всю строку */
     .btn-delete-song {
         position: relative;
         z-index: 2;
@@ -308,4 +331,23 @@
     .btn-delete-playlist-main:active {
         transform: translateY(0);
     }
+
+    .btn-soft-confirm {
+        background-color: #ee5253;
+        color: #ffffff;
+        border: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(238, 82, 83, 0.3);
+    }
+
+    .btn-soft-confirm:hover {
+        background-color: #d43d3d;
+        color: #ffffff;
+        box-shadow: 0 6px 18px rgba(255, 87, 88, 0.45);
+        transform: translateY(-1px);
+    }
+
+    .btn-soft-confirm:active {
+        transform: scale(0.98);
+}
 </style>
