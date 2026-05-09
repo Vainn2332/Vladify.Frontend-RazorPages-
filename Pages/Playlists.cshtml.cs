@@ -60,4 +60,24 @@ public class PlaylistsModel(PlaylistService playlistService) : PageModel
         }
     }
 
+    public async Task<IActionResult> OnPostDeletePlaylistAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var accessToken = await HttpContext.GetTokenAsync("access_token");
+
+        try
+        {
+            await playlistService.DeletePlaylistAsync(id, accessToken, cancellationToken);
+
+            TempData["SuccessMessage"] = "Плейлист успешно удалён!";
+
+            return RedirectToPage("Index");
+        }
+        catch
+        {
+            TempData["ErrorMessage"] = "что-то пошло не так";
+
+            return RedirectToPage(new { id = id });
+        }
+    }
+
 }
