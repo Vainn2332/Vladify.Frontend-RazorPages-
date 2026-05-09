@@ -22,13 +22,34 @@
                 </div>
             </div>
             <div class="col">
-                <h1 class="display-4 fw-bold mb-1 mt-0">@Model.PlaylistModel.Name</h1>
-                <div class="d-flex align-items-center text-muted">
-                    <span class="fw-bold text-dark">@Model.PlaylistModel.AuthorName</span>
-                    <span class="mx-2">•</span>
-                    <span>@Model.PlaylistModel.Songs.Count треков</span>
-                </div>
-            </div>
+    <div id="playlistNameContainer" class="d-flex align-items-center">
+        <h1 class="display-4 fw-bold mb-1 mt-0">@Model.PlaylistModel.Name</h1>
+        <button type="button" class="btn btn-link text-muted ms-3 p-0 edit-icon-btn" onclick="toggleEditName()" title="Изменить название">
+            <i class="bi bi-pencil-square fs-2"></i>
+        </button>
+    </div>
+
+    <form id="editNameForm" method="post" asp-page-handler="UpdatePlaylist" asp-route-id="@Model.PlaylistModel.Id" class="d-none mt-2">
+        <div class="d-flex align-items-center gap-2">
+            <input asp-for="PlaylistUpdateRequestModel.Name" 
+                   class="form-control form-control-lg fw-bold border-0 shadow-sm rounded-3" 
+                   style="max-width: 400px; font-size: 2rem;"
+                   value="@Model.PlaylistModel.Name" />
+            <button type="submit" class="btn btn-vladify-save rounded-circle shadow-sm">
+                <i class="bi bi-check-lg text-white"></i>
+            </button>
+            <button type="button" class="btn btn-light rounded-circle shadow-sm" onclick="toggleEditName()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </form>
+
+    <div class="d-flex align-items-center text-muted">
+        <span class="fw-bold text-dark">@Model.PlaylistModel.AuthorName</span>
+        <span class="mx-2">•</span>
+        <span>@Model.PlaylistModel.Songs.Count треков</span>
+    </div>
+</div>
         </div>
 
         <div class="d-flex align-items-center mb-4 gap-4">
@@ -117,7 +138,23 @@
             button.classList.toggle('playing');
             button.classList.toggle('paused');
         }
+
+        function toggleEditName() {
+            const container = document.getElementById('playlistNameContainer');
+            const form = document.getElementById('editNameForm');
+
+            if (form.classList.contains('d-none')) {
+                container.classList.add('d-none');
+                form.classList.remove('d-none');
+                // Ставим фокус в инпут для удобства
+                form.querySelector('input').focus();
+            } else {
+                container.classList.remove('d-none');
+                form.classList.add('d-none');
+            }
+        }
     </script>
+
 }
 
 <style>
@@ -218,5 +255,29 @@
     .btn-delete-song {
         position: relative;
         z-index: 2;
+    }
+    .edit-icon-btn {
+        transition: all 0.2s ease;
+        opacity: 0.6;
+    }
+    .edit-icon-btn:hover {
+        opacity: 1;
+        color: #27b89d !important;
+        transform: scale(1.1);
+    }
+
+    .btn-vladify-save {
+        background: linear-gradient(135deg, #41d3b7 0%, #27b89d 100%);
+        border: none;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+    }
+    .btn-vladify-save:hover {
+        filter: brightness(1.1);
+        transform: scale(1.05);
     }
 </style>

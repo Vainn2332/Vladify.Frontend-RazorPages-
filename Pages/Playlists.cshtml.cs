@@ -8,6 +8,9 @@ namespace Vladify.Frontend.Pages;
 
 public class PlaylistsModel(PlaylistService playlistService) : PageModel
 {
+    [BindProperty]
+    public PlaylistUpdateRequestModel PlaylistUpdateRequestModel { get; set; }
+
     public PlaylistModel PlaylistModel { get; set; }
 
     public async Task OnGetAsync(Guid id, CancellationToken cancellationToken)
@@ -36,4 +39,25 @@ public class PlaylistsModel(PlaylistService playlistService) : PageModel
             return RedirectToPage(new { id = id });
         }
     }
+
+    public async Task<IActionResult> OnPostUpdatePlaylistAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var accessToken = await HttpContext.GetTokenAsync("access_token");
+
+        try
+        {
+            await playlistService.UpdatePlaylistAsync(PlaylistUpdateRequestModel, id, accessToken, cancellationToken);
+
+            TempData["SuccessMessage"] = "Плейлист успешно обновлён!";
+
+            return RedirectToPage(new { id = id });
+        }
+        catch
+        {
+            TempData["ErrorMessage"] = "что-то пошло не так";
+
+            return RedirectToPage(new { id = id });
+        }
+    }
+
 }
