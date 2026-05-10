@@ -6,6 +6,23 @@ namespace Vladify.Frontend.services;
 
 public class PlaylistService(HttpClient client)
 {
+    public async Task<PlaylistModel> AddSongToPlaylistAsync(Guid playlistId, Guid songId, string accessToken, CancellationToken cancellationToken)
+    {
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        var response = await client.PostAsJsonAsync($"{MyConstants.BaseApiUrl}/api/playlists/{playlistId}/songs/{songId}", cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var newPlaylist = await response.Content.ReadFromJsonAsync<PlaylistModel>();
+            return newPlaylist!;
+        }
+        else
+        {
+            var error = await response.Content.ReadFromJsonAsync<ErrorDetails>();
+            throw new Exception($"{error?.ErrorTitle}\n{error?.ErrorMessage}");
+        }
+    }
+
     public async Task<IEnumerable<PlaylistModel>> GetPlaylistsOfCurrentUserAsync(PaginationFilter paginationFilter, string accessToken, CancellationToken cancellationToken)
     {
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
