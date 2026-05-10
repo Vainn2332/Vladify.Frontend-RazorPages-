@@ -1,5 +1,6 @@
 using Auth0.AspNetCore.Authentication;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Vladify.Frontend.Mappers;
 using Vladify.Frontend.services;
 
@@ -19,6 +20,7 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
     options.ClientSecret = builder.Configuration["Auth0Options:ClientSecret"];
 
     options.Scope = "openid profile email offline_access";
+
 })
 .WithAccessToken(options =>
 {
@@ -26,6 +28,25 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
 
     options.UseRefreshTokens = true;
 });
+builder.Services.Configure<OpenIdConnectOptions>(Auth0Constants.AuthenticationScheme, options =>
+{
+    options.Events.OnRemoteFailure = context =>
+    {
+        if (context.Failure != null && context.Failure.Message.Contains("access_denied"))
+        {
+            context.Response.Redirect("Account/Login?errorType=canceled");
+            context.HandleResponse();
+        }
+        else
+        {
+            context.Response.Redirect("Account/Login?errorType=unknown");
+            context.HandleResponse();
+        }
+
+        return Task.CompletedTask;
+    };
+});
+
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(UserMapper).Assembly);
 
