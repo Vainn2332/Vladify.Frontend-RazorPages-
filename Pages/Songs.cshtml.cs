@@ -23,7 +23,7 @@ public class SongsModel(UserService userService, SongService songService, Playli
         Owner = await userService.GetUserByIdAsync(userId, accessToken!, cancellationToken);
         Songs = await songService.GetAllSongsOfUserAsync(Owner.Id, accessToken!, cancellationToken);
 
-        var paginationFilter = new PaginationFilter(1, 100);
+        var paginationFilter = new PaginationFilter(1, MyConstants.DropBoxPlaylistsPaginationPageSize);
         var playlists = await playlistService.GetPlaylistsOfCurrentUserAsync(paginationFilter, accessToken!, cancellationToken);
         UserPlaylists = playlists.ToList();
     }
