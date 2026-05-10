@@ -32,9 +32,9 @@ public class PlaylistsModel(PlaylistService playlistService) : PageModel
 
             return RedirectToPage(new { id = id });
         }
-        catch
+        catch (Exception ex)
         {
-            TempData["ErrorMessage"] = "что-то пошло не так";
+            TempData["ErrorMessage"] = ex.Message;
 
             return RedirectToPage(new { id = id });
         }
@@ -52,9 +52,9 @@ public class PlaylistsModel(PlaylistService playlistService) : PageModel
 
             return RedirectToPage(new { id = id });
         }
-        catch
+        catch (Exception ex)
         {
-            TempData["ErrorMessage"] = "что-то пошло не так";
+            TempData["ErrorMessage"] = ex.Message;
 
             return RedirectToPage(new { id = id });
         }
@@ -72,9 +72,9 @@ public class PlaylistsModel(PlaylistService playlistService) : PageModel
 
             return RedirectToPage("Index");
         }
-        catch
+        catch (Exception ex)
         {
-            TempData["ErrorMessage"] = "что-то пошло не так";
+            TempData["ErrorMessage"] = ex.Message;
 
             return RedirectToPage(new { id = id });
         }
