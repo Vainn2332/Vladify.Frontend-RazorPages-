@@ -56,9 +56,9 @@ namespace Vladify.Frontend.Pages
 
                 return RedirectToPage("MySongs");
             }
-            catch
+            catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "что-то пошло не так";
+                TempData["ErrorMessage"] = ex.Message;
 
                 return RedirectToPage("MySongs");
             }
