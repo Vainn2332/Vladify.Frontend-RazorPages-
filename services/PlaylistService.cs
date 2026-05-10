@@ -6,7 +6,7 @@ namespace Vladify.Frontend.services;
 
 public class PlaylistService(HttpClient client)
 {
-    public async Task<PlaylistModel> AddSongToPlaylistAsync(Guid playlistId, Guid songId, string accessToken, CancellationToken cancellationToken)
+    public async Task<PlaylistModel> AddSongToPlaylistAsync(Guid songId, Guid playlistId, string accessToken, CancellationToken cancellationToken)
     {
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         var response = await client.PostAsJsonAsync($"{MyConstants.BaseApiUrl}/api/playlists/{playlistId}/songs/{songId}", cancellationToken);
