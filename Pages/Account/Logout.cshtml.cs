@@ -1,5 +1,4 @@
 using Auth0.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -8,17 +7,29 @@ namespace Vladify.Frontend.Pages.Account
 {
     public class LogoutModel : PageModel
     {
-        public async Task<IActionResult> OnGetAsync()
+        public IActionResult OnGet()
         {
+            return ExecuteLogout();
+        }
+
+        public IActionResult OnPost()
+        {
+            return ExecuteLogout();
+        }
+
+        private IActionResult ExecuteLogout()
+        {
+            var redirectUrl = Url.Page("/Account/Login");
+
             var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
-           .WithRedirectUri("/")
-           .Build();
+                .WithRedirectUri(redirectUrl!)
+                .Build();
 
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            await HttpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-
-            return RedirectToPage("Account/Login");
+            return SignOut(
+                authenticationProperties,
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                Auth0Constants.AuthenticationScheme
+            );
         }
     }
 }

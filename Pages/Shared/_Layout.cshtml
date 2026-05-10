@@ -48,7 +48,7 @@
                     
                         @if (!string.IsNullOrEmpty(userPic))
                         {
-                            <li class="nav-item">
+                            <li class="nav-item me-4">
                                 <a asp-page="/Profile" class="d-flex align-items-center">
                                     <img src="@userPic"
                                          alt="Profile"
@@ -58,6 +58,16 @@
                                 </a>
                             </li>
                         }
+                        <li class="nav-item d-flex align-items-center">
+                            <form asp-page="Account/Logout" method="post" class="m-0 p-0 d-flex">
+                                <button type="submit"
+                                        class="btn btn-light text-danger shadow-sm d-flex align-items-center gap-2"
+                                        style="border-radius: 50px; padding: 8px 18px; font-weight: 600; transition: all 0.2s;">
+                                    <i class="bi bi-box-arrow-right" style="font-size: 1.1rem;"></i>
+                                    <span>Выйти</span>
+                                </button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
             </div>
