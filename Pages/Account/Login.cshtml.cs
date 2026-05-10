@@ -14,12 +14,14 @@ public class LoginModel : PageModel
         return Page();
     }
 
-    public async Task OnPostAsync(string returnUrl = "/")
+    public async Task<IActionResult> OnPostAsync(string returnUrl = "/")
     {
         var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
-            .WithRedirectUri(string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl)
-            .Build();
+        .WithRedirectUri(string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl)
+        .Build();
 
         await HttpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+
+        return Page();
     }
 }
