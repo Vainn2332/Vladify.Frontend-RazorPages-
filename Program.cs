@@ -35,6 +35,7 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<PlaylistService>();
+builder.Services.AddScoped<SongService>();
 
 var app = builder.Build();
 

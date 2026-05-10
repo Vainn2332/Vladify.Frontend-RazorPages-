@@ -1,0 +1,381 @@
+﻿@page
+@model Vladify.Frontend.Pages.MySongsModel
+@{
+}
+<div class="container-fluid px-4 mt-5">
+    @if (Model.Songs == null)
+    {
+        <div class="alert alert-soft-warning d-flex align-items-center rounded-4 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+            <div>Автор не найден.</div>
+        </div>
+        <a asp-page="/Index" class="btn btn-light rounded-pill mt-3">← Назад к медиатеке</a>
+    }
+    else
+    {
+        <div class="row align-items-center mb-4">
+            <div class="col-auto">
+                <div class="playlist-hero-cover grad-purple shadow-lg rounded-4 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-music-note-beamed text-white display-1 opacity-50"></i>
+                </div>
+            </div>
+            <div class="col">
+                <h1 class="display-4 fw-bold mb-1 mt-0">Мои песни</h1>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <button class="btn-vladify-play paused shadow-lg" onclick="togglePlayMain(this)">
+                <svg class="vladify-play-svg vladify-symbol-paused" viewBox="0 0 16 16" width="40" height="40">
+                  <path fill="black" d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+                </svg>
+                <svg class="vladify-play-svg vladify-symbol-playing" viewBox="0 0 16 16" width="40" height="40">
+                  <path fill="black" d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/>
+                </svg>
+            </button>
+            
+            <button type="button" 
+                    class="btn btn-vladify-add rounded-pill px-4 py-2 shadow-sm d-flex align-items-center gap-2"
+                    data-bs-toggle="modal" 
+                    data-bs-target="#addSongModal">
+                <i class="bi bi-plus-lg"></i>
+                <span>Добавить песню</span>
+            </button>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-5">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 custom-table">
+                    <thead class="bg-light text-muted small text-uppercase fw-bold">
+                        <tr>
+                            <th class="ps-4 py-3" style="width: 50px;">#</th>
+                            <th>Название</th>
+                            <th>Альбом</th>
+                            <th class="text-end"><i class="bi bi-clock"></i></th>
+                            <th class="text-end pe-4" style="width: 50px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ int i = 1; }
+                        @foreach (var song in Model.Songs)
+                        {
+                            <tr class="song-row">
+                                <td class="ps-4 text-muted">@i</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="song-icon-placeholder me-3 rounded shadow-sm d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-music-note text-accent"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold song-title">@song.Title</div>
+                                            <div class="text-muted small">@song.Author</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-muted small">@song.Album</td>
+                                <td class="text-end text-muted small mono">
+                                    @FormatDuration(song.Duration)
+                                </td>
+                                <td class="text-end pe-4">
+                                    <button type="button" 
+                                            class="btn-delete-song" 
+                                            title="Удалить"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#confirmDeleteModal"
+                                            data-song-id="@song.Id"
+                                            data-song-title="@song.Title">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (!Model.Songs.Any())
+            {
+                <div class="text-center py-5">
+                    <p class="text-muted fs-5">Здесь пока ничего нет.</p>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-exclamation-circle display-3 opacity-75" style="color: #cca4a4;"></i>
+                    </div>
+                    
+                    <h4 class="fw-bold mb-2">Удалить песню?</h4>
+                    <p class="text-muted mb-4">
+                       Вы уверены, что хотите удалить песню 
+                       <strong id="songTitleToDelete"></strong>?
+                    </p>
+
+                    <div class="d-grid gap-2">
+                        <form method="post" asp-page-handler="DeleteSong" id="deleteSongForm">
+                            <input type="hidden" name="songId" id="songIdToDelete" />
+                            <button type="submit" class="btn btn-soft-confirm w-100 rounded-pill py-2 fw-bold">
+                                Да, удалить песню
+                            </button>
+                        </form>
+                        <button type="button" class="btn btn-light w-100 rounded-pill py-2 text-muted shadow-none" data-bs-dismiss="modal">
+                            Отмена
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addSongModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <form method="post" asp-page-handler="CreateSong">
+                <div class="modal-header border-0 pb-0">
+                    <h4 class="modal-title fw-bold">Добавить песню</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-3">
+                    <div class="mb-3">
+                        <label asp-for="SongAddRequestModel.Title" class="form-label fw-semibold">Название</label>
+                        <input asp-for="SongAddRequestModel.Title" class="form-control rounded-3" placeholder="Например: Midnight Drive" required />
+                        <span asp-validation-for="SongAddRequestModel.Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SongAddRequestModel.Album" class="form-label fw-semibold">Альбом</label>
+                        <input asp-for="SongAddRequestModel.Album" class="form-control rounded-3" placeholder="Например: City Lights" required />
+                        <span asp-validation-for="SongAddRequestModel.Album" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SongAddRequestModel.Duration" class="form-label fw-semibold">Длительность</label>
+                        <input asp-for="SongAddRequestModel.Duration" type="time" step="1" class="form-control rounded-3" style="cursor:text" placeholder="mm:ss" required />
+                        <span asp-validation-for="SongAddRequestModel.Duration" class="text-danger small"></span>
+                        <div class="form-text">Формат: <code>mm:ss</code> или <code>hh:mm:ss</code></div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-0 pt-0 justify-content-center gap-3">
+                    <button type="submit" class="btn btn-vladify-save rounded-pill py-2 m-0 text-white fw-bold" style="width: 150px;">
+                        Сохранить
+                    </button>
+                    <button type="button" class="btn btn-light rounded-pill px-4 py-2 m-0 text-muted" data-bs-dismiss="modal">
+                        Отмена
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+
+@functions {
+    private string FormatDuration(TimeSpan duration)
+    {
+        if (duration.TotalHours >= 1)
+            return duration.ToString(@"hh\:mm\:ss");
+        return duration.ToString(@"mm\:ss");
+    }
+}
+
+@section Scripts {
+    <script>
+        function togglePlayMain(button) {
+            button.classList.toggle('playing');
+            button.classList.toggle('paused');
+        }
+        const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+        confirmDeleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const songId = button.getAttribute('data-song-id');
+            const songTitle = button.getAttribute('data-song-title');
+            document.getElementById('songIdToDelete').value = songId;
+            document.getElementById('songTitleToDelete').textContent = songTitle;
+        });
+    </script>
+
+}
+
+<style>
+    :root {
+        --accent-color: #74b9ff;
+        --vladify-btn-grad: linear-gradient(135deg, #41d3b7 0%, #27b89d 100%);
+        --vladify-btn-hover: linear-gradient(135deg, #51e3c7 0%, #2cccae 100%);
+    }
+
+    .playlist-hero-cover {
+        width: 170px;
+        height: 170px;
+    }
+
+    .btn-vladify-play {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--vladify-btn-grad); 
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+    }
+
+    .vladify-play-svg {
+        display: none; 
+        width: 40px; 
+        height: 40px;
+    }
+
+    .btn-vladify-play.paused .vladify-symbol-paused {
+        display: block;
+        margin-left: 5px; 
+    }
+
+    .btn-vladify-play.playing .vladify-symbol-playing {
+        display: block;
+    }
+
+    .btn-vladify-play:hover {
+        transform: scale(1.1);
+        background: var(--vladify-btn-hover);
+        box-shadow: 0 8px 20px rgba(39, 184, 157, 0.4) !important;
+    }
+
+    .btn-vladify-play:active {
+        transform: scale(0.95);
+    }
+
+    .btn-icon-secondary {
+        background: none; border: none; color: #6a737d; font-size: 1.6rem;
+        transition: all 0.2s;
+    }
+    
+    .btn-icon-secondary:hover { color: #27b89d; transform: scale(1.1); }
+
+    .custom-table thead th { border-bottom: none; font-size: 0.7rem; color: #adb5bd; }
+    .song-row { cursor: pointer; transition: background-color 0.2s; }
+    .song-row:hover { background-color: rgba(116, 185, 255, 0.05) !important; }
+    .song-row:hover .song-title { color: var(--accent-color); }
+
+    .song-icon-placeholder {
+        width: 38px;
+        height: 38px;
+        background-color: #f8f9fa;
+        border: 1px solid rgba(0,0,0,0.02);
+    }
+
+    .text-accent { color: var(--accent-color); }
+    .mono { font-family: 'SFMono-Regular', Consolas, monospace; letter-spacing: -0.5px; }
+
+    .grad-4 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+
+    .alert-soft-warning {
+        background-color: #fff9db;
+        border: 1px solid #ffec99;
+        color: #f08c00;
+    }
+    .btn-delete-song {
+        background: none;
+        border: none;
+        color: #adb5bd;
+        transition: all 0.2s ease;
+        padding: 5px;
+        border-radius: 8px;
+    }
+    .btn-delete-song:hover {
+        color: #ff4757; 
+        background-color: rgba(255, 71, 87, 0.1);
+        transform: scale(1.1);
+    }
+    .btn-delete-song {
+        position: relative;
+        z-index: 2;
+    }
+    .edit-icon-btn {
+        transition: all 0.2s ease;
+        opacity: 0.6;
+    }
+    .edit-icon-btn:hover {
+        opacity: 1;
+        color: #27b89d !important;
+        transform: scale(1.1);
+    }
+
+    .btn-vladify-save {
+        background: linear-gradient(135deg, #41d3b7 0%, #27b89d 100%);
+        border: none;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+    }
+    .btn-vladify-save:hover {
+        filter: brightness(1.1);
+        transform: scale(1.05);
+    }
+    .btn-delete-playlist-main {
+        background-color: rgba(255, 71, 87, 0.05);
+        color: #ff4757;
+        border: 1px solid rgba(255, 71, 87, 0.2);
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .btn-delete-playlist-main:hover {
+        background-color: #ff4757;
+        color: white;
+        border-color: #ff4757;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+    }
+
+    .btn-delete-playlist-main:active {
+        transform: translateY(0);
+    }
+
+    .btn-soft-confirm {
+        background-color: #ee5253;
+        color: #ffffff;
+        border: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(238, 82, 83, 0.3);
+    }
+
+    .btn-soft-confirm:hover {
+        background-color: #d43d3d;
+        color: #ffffff;
+        box-shadow: 0 6px 18px rgba(255, 87, 88, 0.45);
+        transform: translateY(-1px);
+    }
+
+    .btn-soft-confirm:active {
+        transform: scale(0.98);
+    }
+    .btn-vladify-add {
+    background: linear-gradient(135deg, #41d3b7 0%, #27b89d 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    }   
+
+    .btn-vladify-add:hover {
+    background: linear-gradient(135deg, #51e3c7 0%, #2cccae 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(39, 184, 157, 0.4) !important;
+    color: white;
+    }
+
+    .btn-vladify-add:active {
+    transform: translateY(0);
+    }
+</style>
