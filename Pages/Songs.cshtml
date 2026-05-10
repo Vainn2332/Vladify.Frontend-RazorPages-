@@ -1,4 +1,4 @@
-﻿@page
+﻿@page "{userId:guid}"
 @model Vladify.Frontend.Pages.SongsModel
 @{
     ViewData["Title"] = "Песни пользователя";
@@ -50,7 +50,7 @@
         <table class="table table-hover align-middle mb-0 custom-table" style="table-layout: fixed;">
             <thead class="bg-light text-muted small text-uppercase fw-bold">
                 <tr>
-                    <th class="ps-4 py-3" style="width: 60px;">#</th>
+                    <th class="ps-4 py-3" style="width: 80px;">#</th>
                     <th style="width: 45%;">Название</th>
                     <th style="width: 40%;">Альбом</th>
                     <th class="text-end pe-4" style="width: 100px;"><i class="bi bi-clock fs-6"></i></th>
@@ -61,18 +61,60 @@
                 @foreach (var song in Model.Songs)
                 {
                     <tr class="song-row">
-                        <td class="ps-4 text-muted fw-medium">@i</td>
-                        <td class="text-truncate pe-3">
-                            <div class="d-flex align-items-center py-1">
-                                <div class="song-icon-placeholder me-3 rounded shadow-sm d-flex align-items-center justify-content-center flex-shrink-0">
-                                    <i class="bi bi-music-note text-accent fs-5"></i>
-                                </div>
-                                <div class="text-truncate">
-                                    <div class="fw-bold song-title fs-6 text-truncate">@song.Title</div>
+                        <!-- Номер + Плюсик -->
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted fw-medium">@i</span>
+
+                                <!-- Кнопка с плюсиком -->
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary border-0 p-1 dropdown-toggle" 
+                                            type="button" 
+                                            data-bs-toggle="dropdown" 
+                                            aria-expanded="false"
+                                            style="box-shadow: none;">
+                                        <i class="bi bi-plus-lg fs-5"></i>
+                                    </button>
+
+                                    <ul class="dropdown-menu shadow-sm">
+                                        @if (Model.UserPlaylists.Any())
+                                        {
+                                            @foreach (var playlist in Model.UserPlaylists)
+                                            {
+                                                <li>
+                                                    <form method="post" asp-page-handler="AddToPlaylist">
+                                                        <input type="hidden" name="userId" value="@Model.Owner.Id" />
+                                                        <input type="hidden" name="songId" value="@song.Id" />
+                                                        <input type="hidden" name="playlistId" value="@playlist.Id" />
+                                                        <button type="submit" class="dropdown-item">
+                                                            @playlist.Name
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <li><span class="dropdown-item-text text-muted">У вас нет плейлистов</span></li>
+                                        }
+                                    </ul>
                                 </div>
                             </div>
                         </td>
-                        <td class="text-muted small text-truncate pe-3">@song.Album</td>
+
+                        <!-- Остальные колонки -->
+                        <td>
+                            <div class="d-flex align-items-center py-1">
+                                <div class="song-icon-placeholder me-3 rounded shadow-sm d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-music-note text-accent fs-5"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold song-title fs-6">@song.Title</div>
+                                    <div class="text-muted small">@Model.Owner.Name</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-muted small">@song.Album</td>
                         <td class="text-end pe-4 text-muted small mono">
                             @FormatDuration(song.Duration)
                         </td>
