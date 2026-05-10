@@ -22,12 +22,12 @@
                 </div>
             </div>
             <div class="col">
-    <div id="playlistNameContainer" class="d-flex align-items-center">
-        <h1 class="display-4 fw-bold mb-1 mt-0">@Model.PlaylistModel.Name</h1>
-        <button type="button" class="btn btn-link text-muted ms-3 p-0 edit-icon-btn" onclick="toggleEditName()" title="Изменить название">
-            <i class="bi bi-pencil-square fs-2"></i>
-        </button>
-    </div>
+            <div id="playlistNameContainer" class="d-flex align-items-center">
+                <h1 class="display-4 fw-bold mb-1 mt-0">@Model.PlaylistModel.Name</h1>
+                    <button type="button" class="btn btn-link text-muted ms-3 p-0 edit-icon-btn" onclick="toggleEditName()" title="Изменить название">
+                        <i class="bi bi-pencil-square fs-2"></i>
+                    </button>
+            </div>
 
     <form id="editNameForm" method="post" asp-page-handler="UpdatePlaylist" asp-route-id="@Model.PlaylistModel.Id" class="d-none mt-2">
         <div class="d-flex align-items-center gap-2">
@@ -96,8 +96,10 @@
                         </div>
                         <div>
                             <div class="fw-bold song-title">@song.Title</div>
-                            <div class="text-muted small">@song.Author</div>
-                        </div>
+                                            <div class="text-muted small">@(song.Author ?? "Пользователь удалён")
+
+                                            </div>
+                                        </div>
                     </div>
                 </td>
                 <td class="text-muted small">@song.Album</td>
