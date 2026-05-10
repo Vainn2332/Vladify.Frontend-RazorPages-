@@ -25,6 +25,7 @@
                 color: white !important;
                 font-weight: 500;
             }
+            .hover-accent:hover { color: var(--accent) !important; transform: scale(1.1); transition: 0.2s; }
     </style>
 </head>
 <body>
@@ -89,168 +90,217 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <div id="toast-container"></div>
     <script>
-            function showToast(message, type = 'success') {
-                const container = document.getElementById('toast-container');
-                const toast = document.createElement('div');
-                toast.className = `vladify-toast ${type === 'success' ? 'toast-success' : 'toast-error'}`;
-                toast.innerHTML = `<span>${message}</span>`;
-                container.appendChild(toast);
-                setTimeout(() => {
-                    toast.classList.add('toast-fade-out');
-                    setTimeout(() => toast.remove(), 300);
-                }, 5000);
-                toast.onclick = () => toast.remove();
-            }
-            document.addEventListener('DOMContentLoaded', () => {
-                const successMsg = '@TempData["SuccessMessage"]';
-                const errorMsg = '@TempData["ErrorMessage"]';
+    // 1. Система уведомлений (Toast)
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `vladify-toast ${type === 'success' ? 'toast-success' : 'toast-error'}`;
+        toast.innerHTML = `<span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('toast-fade-out');
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+        toast.onclick = () => toast.remove();
+    }
 
-                if (successMsg) showToast(successMsg, 'success');
-                if (errorMsg) showToast(errorMsg, 'error');
-            });
-            //////////////////////////////////////////////////
-                        function showToast(message, type = 'success') {
-                const container = document.getElementById('toast-container');
-                const toast = document.createElement('div');
-                toast.className = `vladify-toast ${type === 'success' ? 'toast-success' : 'toast-error'}`;
-                toast.innerHTML = `<span>${message}</span>`;
-                container.appendChild(toast);
-                setTimeout(() => {
-                    toast.classList.add('toast-fade-out');
-                    setTimeout(() => toast.remove(), 300);
-                }, 5000);
-                toast.onclick = () => toast.remove();
-            }
+    document.addEventListener('DOMContentLoaded', () => {
+        const successMsg = '@TempData["SuccessMessage"]';
+        const errorMsg = '@TempData["ErrorMessage"]';
+        if (successMsg) showToast(successMsg, 'success');
+        if (errorMsg) showToast(errorMsg, 'error');
+    });
 
-            document.addEventListener('DOMContentLoaded', () => {
-                const successMsg = '@TempData["SuccessMessage"]';
-                const errorMsg = '@TempData["ErrorMessage"]';
-                if (successMsg) showToast(successMsg, 'success');
-                if (errorMsg) showToast(errorMsg, 'error');
-            });
-
-            // 2. Система живого поиска (Live Search)
-            document.addEventListener('DOMContentLoaded', () => {
-                let debounceTimer;
-                const searchInput = document.getElementById('live-search-input');
-                const searchDropdown = document.getElementById('live-search-dropdown');
-                const searchContainer = document.getElementById('live-search-container');
+    // 2. Система живого поиска (Live Search)
+    document.addEventListener('DOMContentLoaded', () => {
+        let debounceTimer;
+        const searchInput = document.getElementById('live-search-input');
+        const searchDropdown = document.getElementById('live-search-dropdown');
+        const searchContainer = document.getElementById('live-search-container');
         
-                if (!searchInput) return;
+        const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        const currentUrl = window.location.pathname + window.location.search;
 
-                searchInput.addEventListener('input', function () {
-                    clearTimeout(debounceTimer);
-                    const query = this.value.trim();
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            const query = this.value.trim();
             
-                    if (query.length < 2) {
-                        hideDropdown();
-                        return;
-                    }
+            if (query.length < 2) {
+                hideDropdown();
+                return;
+            }
 
-                    debounceTimer = setTimeout(() => {
-                        fetch(`/Search?handler=Results&q=${encodeURIComponent(query)}`)
-                            .then(response => response.json())
-                            .then(data => renderSearchResults(data))
-                            .catch(err => console.error("Ошибка поиска:", err));
-                    }, 300);
+            debounceTimer = setTimeout(() => {
+                fetch(`/Search?handler=Results&q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => renderSearchResults(data))
+                    .catch(err => console.error("Ошибка поиска:", err));
+            }, 300);
+        });
+
+        function renderSearchResults(data) {
+            searchDropdown.innerHTML = '';
+            const hasUsers = data.users && data.users.length > 0;
+            const hasSongs = data.songs && data.songs.length > 0;
+
+            if (!hasUsers && !hasSongs) {
+                searchDropdown.innerHTML = '<div class="p-3 text-center text-muted small">Ничего не найдено</div>';
+                showDropdown();
+                return;
+            }
+
+            let html = '';
+
+            // --- РЕНДЕР ИСПОЛНИТЕЛЕЙ ---
+            if (hasUsers) {
+                html += '<div class="dropdown-header fw-bold text-muted text-uppercase small pt-1 px-2">Исполнители</div>';
+                data.users.forEach(user => {
+                    html += `
+                        <a href="/Songs/${user.id}" class="dropdown-item d-flex align-items-center gap-3 py-2 rounded-3 text-decoration-none">
+                            <i class="bi bi-person-circle fs-4 text-muted"></i>
+                            <div>
+                                <div class="fw-medium text-dark">${escapeHtml(user.name)}</div>
+                                <div class="text-muted small" style="font-size: 0.7rem;">${escapeHtml(user.emailAddress)}</div>
+                            </div>
+                        </a>
+                    `;
                 });
+            }
 
-                function renderSearchResults(data) {
-                    searchDropdown.innerHTML = '';
-                    const hasUsers = data.users && data.users.length > 0;
-                    const hasSongs = data.songs && data.songs.length > 0;
+            // --- РЕНДЕР ТРЕКОВ ---
+            if (hasSongs) {
+                if (hasUsers) html += '<hr class="my-2 opacity-10">';
+                html += '<div class="dropdown-header fw-bold text-muted text-uppercase small pt-1 px-2">Треки</div>';
+                
+                // Генерируем элементы списка плейлистов (БЕЗ классов Bootstrap dropdown-menu)
+                let playlistsHtml = '';
+                if (data.playlists && data.playlists.length > 0) {
+                    data.playlists.forEach(pl => {
+                        playlistsHtml += `
+                            <div class="p-1">
+                                <form method="post" action="/Search?handler=AddToPlaylist" class="m-0">
+                                    <input type="hidden" name="__RequestVerificationToken" value="${csrfToken}" />
+                                    <input type="hidden" name="songId" value="SONG_ID_PLACEHOLDER" />
+                                    <input type="hidden" name="playlistId" value="${pl.id}" />
+                                    <input type="hidden" name="returnUrl" value="${currentUrl}" />
+                                    <button type="submit" class="btn btn-sm btn-light w-100 text-start text-truncate small py-1" style="max-width: 180px; background: transparent;">
+                                        ${escapeHtml(pl.name)}
+                                    </button>
+                                </form>
+                            </div>
+                        `;
+                    });
+                } else {
+                    playlistsHtml = '<div class="p-2 text-muted small text-center">Нет плейлистов</div>';
+                }
 
-                    if (!hasUsers && !hasSongs) {
-                        searchDropdown.innerHTML = '<div class="p-3 text-center text-muted small">Ничего не найдено</div>';
-                        showDropdown();
-                        return;
-                    }
+                data.songs.forEach(song => {
+                    const currentSongPlaylistsHtml = playlistsHtml.replace(/SONG_ID_PLACEHOLDER/g, song.id);
 
-                    let html = '';
-
-                    // Рендер Исполнителей
-                    if (hasUsers) {
-                        html += '<div class="dropdown-header fw-bold text-muted text-uppercase small pt-1 px-2">Исполнители</div>';
-                        data.users.forEach(user => {
-                            html += `
-                                <a href="/Songs/${user.id}" class="dropdown-item d-flex align-items-center gap-3 py-2 rounded-3 text-decoration-none">
-                                    <i class="bi bi-person-circle fs-4 text-muted"></i>
-                                    <div>
-                                        <div class="fw-medium text-dark">${escapeHtml(user.name)}</div>
-                                        <div class="text-muted small" style="font-size: 0.7rem;">${escapeHtml(user.emailAddress)}</div>
+                    html += `
+                        <div class="dropdown-item d-flex align-items-center justify-content-between py-2 rounded-3" style="cursor: default; overflow: visible;">
+                            
+                            <!-- ИСПРАВЛЕНО: убран overflow-hidden у родителя, чтобы меню не срезалось -->
+                            <div class="d-flex align-items-center gap-2 me-2" style="overflow: visible;">
+                                
+                                <!-- ПОЛНОСТЬЮ КАСТОМНАЯ КНОПКА "+" И МЕНЮ -->
+                                <div class="position-relative me-1" style="overflow: visible;">
+                                    <button class="btn btn-sm btn-light p-1 border-0 d-flex align-items-center justify-content-center shadow-none"
+                                            type="button"
+                                            onclick="togglePlaylistMenu(event, this)"
+                                            style="width: 28px; height: 28px; background: transparent;">
+                                        <i class="bi bi-plus-lg fs-5 text-muted" style="pointer-events: none;"></i>
+                                    </button>
+                                    
+                                    <!-- Абсолютное подменю (скрыто по умолчанию через d-none) -->
+                                    <div class="bg-white shadow border border-light rounded-3 mt-1 playlist-submenu d-none" 
+                                         style="position: absolute; top: 100%; left: 0; z-index: 9999; width: 200px; max-height: 200px; overflow-y: auto;">
+                                        <div class="bg-light px-2 py-1 small text-muted fw-bold border-bottom">Добавить в...</div>
+                                        ${currentSongPlaylistsHtml}
                                     </div>
-                                </a>
-                            `;
-                        });
-                    }
-
-                    // Рендер Треков
-                    if (hasSongs) {
-                        if (hasUsers) html += '<hr class="my-2 opacity-10">';
-                        html += '<div class="dropdown-header fw-bold text-muted text-uppercase small pt-1 px-2">Треки</div>';
-                        data.songs.forEach(song => {
-                            html += `
-                                <div class="dropdown-item d-flex align-items-center justify-content-between py-2 rounded-3" style="cursor: default;">
-                                    <div class="d-flex align-items-center gap-3 overflow-hidden me-2">
-                                        <div class="bg-light rounded p-1 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
-                                            <i class="bi bi-music-note text-accent"></i>
-                                        </div>
-                                        <div class="text-truncate">
-                                            <div class="fw-bold small text-dark mb-0 text-truncate">${escapeHtml(song.title)}</div>
-                                            <div class="text-muted text-truncate" style="font-size: 0.75rem;">
-                                                ${escapeHtml(song.author)} • ${escapeHtml(song.album)}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span class="text-muted font-monospace small flex-shrink-0">${formatDuration(song.duration)}</span>
                                 </div>
-                            `;
-                        });
-                    }
 
-                    searchDropdown.innerHTML = html;
-                    showDropdown();
-                }
-
-                // Управление видимостью списка
-                function showDropdown() {
-                    searchDropdown.classList.remove('d-none');
-                    searchDropdown.classList.add('d-block');
-                }
-
-                function hideDropdown() {
-                    searchDropdown.classList.remove('d-block');
-                    searchDropdown.classList.add('d-none');
-                }
-
-                document.addEventListener('click', function (e) {
-                    if (!searchContainer.contains(e.target)) {
-                        hideDropdown();
-                    }
+                                <!-- Иконка и название трека -->
+                                <div class="bg-light rounded p-1 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
+                                    <i class="bi bi-music-note text-accent"></i>
+                                </div>
+                                <div class="text-truncate" style="max-width: 250px;">
+                                    <div class="fw-bold small text-dark mb-0 text-truncate">${escapeHtml(song.title)}</div>
+                                    <div class="text-muted text-truncate" style="font-size: 0.75rem;">
+                                        ${escapeHtml(song.author)} • ${escapeHtml(song.album)}
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="text-muted font-monospace small flex-shrink-0">${formatDuration(song.duration)}</span>
+                        </div>
+                    `;
                 });
+            }
 
-                searchInput.addEventListener('focus', function () {
-                    if (this.value.trim().length >= 2 && searchDropdown.innerHTML !== '') {
-                        showDropdown();
-                    }
-                });
+            searchDropdown.innerHTML = html;
+            showDropdown();
+        }
 
-                function escapeHtml(str) {
-                    if (!str) return '';
-                    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-                }
+        function showDropdown() {
+            searchDropdown.classList.remove('d-none');
+            searchDropdown.classList.add('d-block');
+        }
 
-                // ИСПРАВЛЕНО: восстановлена логика форматирования времени
-                function formatDuration(durationStr) {
-                    if (!durationStr) return '';
-                    const parts = durationStr.split(':');
-                    if (parts.length === 3) {
-                        return parts[0] === "00" ? `${parts[1]}:${parts[2].substring(0,2)}` : durationStr.substring(0,8);
-                    }
-                    return durationStr;
-                }
-            });
-    </script>
+        function hideDropdown() {
+            searchDropdown.classList.remove('d-block');
+            searchDropdown.classList.add('d-none');
+        }
+
+        // Глобальный клик: закрывает и поиск, и открытые меню плейлистов
+        document.addEventListener('click', function (e) {
+            // Прячем все открытые подменю "+"
+            document.querySelectorAll('.playlist-submenu').forEach(menu => menu.classList.add('d-none'));
+
+            if (!searchContainer.contains(e.target)) {
+                hideDropdown();
+            }
+        });
+
+        searchInput.addEventListener('focus', function () {
+            if (this.value.trim().length >= 2 && searchDropdown.innerHTML !== '') {
+                showDropdown();
+            }
+        });
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function formatDuration(durationStr) {
+            if (!durationStr) return '';
+            const parts = durationStr.split(':');
+            if (parts.length === 3) {
+                return parts[0] === "00" ? `${parts[1]}:${parts[2].substring(0,2)}` : durationStr.substring(0,8);
+            }
+            return durationStr;
+        }
+    });
+
+    // 3. НАДЕЖНАЯ ФУНКЦИЯ ОТКРЫТИЯ МЕНЮ ПЛЕЙЛИСТОВ
+    function togglePlaylistMenu(event, button) {
+        event.preventDefault();
+        event.stopPropagation(); // Не даем клику закрыть основной поиск
+
+        const submenu = button.nextElementSibling;
+        const isCurrentlyHidden = submenu.classList.contains('d-none');
+
+        // Сначала прячем ВСЕ другие открытые списки плейлистов
+        document.querySelectorAll('.playlist-submenu').forEach(menu => menu.classList.add('d-none'));
+
+        // Если наш список был скрыт — показываем его (убираем d-none)
+        if (isCurrentlyHidden) {
+            submenu.classList.remove('d-none');
+        }
+    }
+</script>
 
     @await RenderSectionAsync("Scripts", required: false)</body>
 </html>
