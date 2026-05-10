@@ -31,58 +31,55 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3 vladify-header">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">Vladify</a>
-                <a class="navbar-brand" asp-area="" asp-page="/MySongs">Мои песни</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                    </ul>
-                    <form class="d-flex mx-auto w-50" method="get" action="/Search">
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 rounded-start-pill text-muted">
-                                <i class="bi bi-search"></i>
-                            </span>
-                            <input type="text"
-                                   name="query"
-                                   class="form-control border-start-0 rounded-end-pill shadow-none"
-                                   placeholder="Что будем слушать?"
-                                   value="@Context.Request.Query["query"]"
-                                   required>
-                            <button class="btn btn-outline-light d-none" type="submit">Искать</button>
+                <!-- 1. Левая часть: Логотип и ссылки -->
+                <div class="d-flex align-items-center">
+                    <a class="navbar-brand" asp-area="" asp-page="/Index">Vladify</a>
+                    <a class="navbar-brand ms-3" asp-area="" asp-page="/MySongs">Мои песни</a>
+                </div>
+
+                <!-- 2. Центральная часть: Строка поиска (mx-auto центрирует её) -->
+                <form class="d-flex mx-auto w-50" method="get" action="/Search">
+                    <div class="input-group w-100">
+                        <span class="input-group-text bg-white border-end-0 rounded-start-pill text-muted">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text"
+                               name="query"
+                               class="form-control border-start-0 rounded-end-pill shadow-none"
+                               placeholder="Что будем слушать?"
+                               value="@Context.Request.Query["query"]"
+                               required>
+                        <button class="btn btn-outline-light d-none" type="submit">Искать</button>
+                    </div>
+                </form>
+
+                <!-- 3. Правая часть: Профиль и Выход -->
+                <div class="d-flex align-items-center">
+                    @{
+                        var userPic = User.FindFirst("picture")?.Value;
+                    }
+        
+                    @if (!string.IsNullOrEmpty(userPic))
+                    {
+                        <div class="me-3">
+                            <a asp-page="/Profile" class="d-flex align-items-center text-decoration-none">
+                                <img src="@userPic"
+                                     alt="Profile"
+                                     title="@User.Identity?.Name"
+                                     class="rounded-circle border"
+                                     style="width: 40px; height: 40px; object-fit: cover;" />
+                            </a>
                         </div>
+                    }
+            
+                    <form asp-page="Account/Logout" method="post" class="d-inline">
+                        <button type="submit"
+                                class="btn btn-light text-danger shadow-sm d-flex align-items-center gap-2"
+                                style="border-radius: 50px; padding: 6px 16px; font-weight: 600;">
+                            <i class="bi bi-box-arrow-right" style="font-size: 1.1rem;"></i>
+                            <span>Выйти</span>
+                        </button>
                     </form>
-                    <ul class="navbar-nav">
-                        @{
-                            var userPic = User.FindFirst("picture")?.Value;
-                        }
-                    
-                        @if (!string.IsNullOrEmpty(userPic))
-                        {
-                            <li class="nav-item me-4">
-                                <a asp-page="/Profile" class="d-flex align-items-center">
-                                    <img src="@userPic"
-                                         alt="Profile"
-                                         title="@User.Identity?.Name"
-                                         class="rounded-circle border"
-                                         style="width: 45px; height: 45px; object-fit: cover;"
-                                         onerror="this.onerror=null; this.src='/images/defaultUser.png';" />
-                                </a>
-                            </li>
-                        }
-                        <li class="nav-item d-flex align-items-center">
-                            <form asp-page="Account/Logout" method="post" class="m-0 p-0 d-flex">
-                                <button type="submit"
-                                        class="btn btn-light text-danger shadow-sm d-flex align-items-center gap-2"
-                                        style="border-radius: 50px; padding: 8px 18px; font-weight: 600; transition: all 0.2s;">
-                                    <i class="bi bi-box-arrow-right" style="font-size: 1.1rem;"></i>
-                                    <span>Выйти</span>
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </nav>
