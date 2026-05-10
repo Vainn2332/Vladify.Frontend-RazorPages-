@@ -4,6 +4,6 @@ namespace Vladify.Frontend.models;
 
 public class SearchResultDto
 {
-    public ICollection<SongModel> Songs { get; set; }
-    public ICollection<UserModel> Users { get; set; }
+    public ICollection<SongModel> Songs { get; set; } = [];
+    public ICollection<UserModel> Users { get; set; } = [];
 }
