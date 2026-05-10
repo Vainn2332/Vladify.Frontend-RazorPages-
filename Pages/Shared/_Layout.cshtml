@@ -11,32 +11,28 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-            /* Мягкий фон: от "Морской пены" в белый */
             body {
                 background: linear-gradient(180deg, #C4DFE6 0%, #ffffff 100%);
                 min-height: 100vh;
                 background-attachment: fixed;
             }
 
-            /* Хедер: переход от "Волны" к "Морской пене" */
             .vladify-header {
                 background: linear-gradient(90deg, #66A5AD 0%, #85B9C0 100%) !important;
             }
 
-            
-                /* Чтобы текст на темной части хедера читался лучше */
-                .vladify-header .navbar-brand {
-                    color: white !important;
-                    font-weight: 500;
-                }
+            .vladify-header .navbar-brand {
+                color: white !important;
+                font-weight: 500;
+            }
     </style>
 </head>
 <body>
     <header>
-        @* Убрал bg-white, добавил класс vladify-header *@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3 vladify-header">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-page="/Index">Vladify</a>
+                <a class="navbar-brand" asp-area="" asp-page="/MySongs">Мои песни</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
