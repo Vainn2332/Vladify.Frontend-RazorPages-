@@ -31,8 +31,6 @@ public class SongsModel(UserService userService, SongService songService, Playli
     public async Task<IActionResult> OnPostAddToPlaylistAsync(Guid userId, Guid songId, Guid playlistId, CancellationToken cancellationToken)
     {
         var accessToken = await HttpContext.GetTokenAsync("access_token");
-
-
         try
         {
             await playlistService.AddSongToPlaylistAsync(songId, playlistId, accessToken, cancellationToken);

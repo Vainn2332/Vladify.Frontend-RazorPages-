@@ -82,10 +82,10 @@
                                             @foreach (var playlist in Model.UserPlaylists)
                                             {
                                                 <li>
-                                                    <form method="post" asp-page-handler="AddToPlaylist">
-                                                        <input type="hidden" name="userId" value="@Model.Owner.Id" />
-                                                        <input type="hidden" name="songId" value="@song.Id" />
-                                                        <input type="hidden" name="playlistId" value="@playlist.Id" />
+                                                    <form method="post" asp-page-handler="AddToPlaylist" 
+                                                    asp-route-userId="@Model.Owner.Id"
+                                                    asp-route-songId="@song.Id"
+                                                    asp-route-playlistId="@playlist.Id">
                                                         <button type="submit" class="dropdown-item">
                                                             @playlist.Name
                                                         </button>
@@ -102,7 +102,6 @@
                             </div>
                         </td>
 
-                        <!-- Остальные колонки -->
                         <td>
                             <div class="d-flex align-items-center py-1">
                                 <div class="song-icon-placeholder me-3 rounded shadow-sm d-flex align-items-center justify-content-center">
