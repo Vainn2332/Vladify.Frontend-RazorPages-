@@ -96,8 +96,10 @@
                         </div>
                         <div>
                             <div class="fw-bold song-title">@song.Title</div>
-                            <div class="text-muted small">@song.Author</div>
-                        </div>
+                                            <div class="text-muted small">@(song.Author ?? "Пользователь удалён")
+
+                                            </div>
+                                        </div>
                     </div>
                 </td>
                 <td class="text-muted small">@song.Album</td>
