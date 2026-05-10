@@ -31,13 +31,10 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3 vladify-header">
             <div class="container">
-                <!-- 1. Левая часть: Логотип и ссылки -->
                 <div class="d-flex align-items-center">
                     <a class="navbar-brand" asp-area="" asp-page="/Index">Vladify</a>
                     <a class="navbar-brand ms-3" asp-area="" asp-page="/MySongs">Мои песни</a>
                 </div>
-
-                <!-- ЖИВОЙ ПОИСК В ШАПКЕ -->
                 <div class="position-relative mx-auto" style="width: 40%;" id="live-search-container">
                     <div class="input-group">
                         <span class="input-group-text bg-white border-end-0 rounded-start-pill text-muted">
@@ -49,21 +46,15 @@
                                placeholder="Поиск треков и исполнителей..."
                                autocomplete="off">
                     </div>
-
-                    <!-- ВСПЛЫВАЮЩИЙ СПИСОК (Скрыт по умолчанию) -->
                     <div id="live-search-dropdown"
                          class="dropdown-menu w-100 shadow-lg border-0 rounded-4 mt-2 p-2 d-none"
                          style="position: absolute; top: 100%; left: 0; z-index: 1050; max-height: 400px; overflow-y: auto;">
-                        <!-- Сюда JS будет вставлять треки и пользователей -->
                     </div>
                 </div>
-
-                <!-- 3. Правая часть: Профиль и Выход -->
                 <div class="d-flex align-items-center">
                     @{
                         var userPic = User.FindFirst("picture")?.Value;
                     }
-        
                     @if (!string.IsNullOrEmpty(userPic))
                     {
                         <div class="me-3">
@@ -76,7 +67,6 @@
                             </a>
                         </div>
                     }
-            
                     <form asp-page="Account/Logout" method="post" class="d-inline">
                         <button type="submit"
                                 class="btn btn-light text-danger shadow-sm d-flex align-items-center gap-2"
@@ -94,30 +84,23 @@
             @RenderBody()
         </main>
     </div>
-
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <div id="toast-container"></div>
-
     <script>
             function showToast(message, type = 'success') {
                 const container = document.getElementById('toast-container');
                 const toast = document.createElement('div');
-        
                 toast.className = `vladify-toast ${type === 'success' ? 'toast-success' : 'toast-error'}`;
                 toast.innerHTML = `<span>${message}</span>`;
-
                 container.appendChild(toast);
-
                 setTimeout(() => {
                     toast.classList.add('toast-fade-out');
                     setTimeout(() => toast.remove(), 300);
                 }, 5000);
-
                 toast.onclick = () => toast.remove();
             }
-
             document.addEventListener('DOMContentLoaded', () => {
                 const successMsg = '@TempData["SuccessMessage"]';
                 const errorMsg = '@TempData["ErrorMessage"]';
@@ -125,24 +108,42 @@
                 if (successMsg) showToast(successMsg, 'success');
                 if (errorMsg) showToast(errorMsg, 'error');
             });
-            
             //////////////////////////////////////////////////
+                        function showToast(message, type = 'success') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `vladify-toast ${type === 'success' ? 'toast-success' : 'toast-error'}`;
+                toast.innerHTML = `<span>${message}</span>`;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.classList.add('toast-fade-out');
+                    setTimeout(() => toast.remove(), 300);
+                }, 5000);
+                toast.onclick = () => toast.remove();
+            }
 
-                document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('DOMContentLoaded', () => {
+                const successMsg = '@TempData["SuccessMessage"]';
+                const errorMsg = '@TempData["ErrorMessage"]';
+                if (successMsg) showToast(successMsg, 'success');
+                if (errorMsg) showToast(errorMsg, 'error');
+            });
+
+            // 2. Система живого поиска (Live Search)
+            document.addEventListener('DOMContentLoaded', () => {
                 let debounceTimer;
                 const searchInput = document.getElementById('live-search-input');
                 const searchDropdown = document.getElementById('live-search-dropdown');
                 const searchContainer = document.getElementById('live-search-container');
-
+        
                 if (!searchInput) return;
 
-                // 1. Слушаем ввод текста с задержкой (Debounce)
                 searchInput.addEventListener('input', function () {
                     clearTimeout(debounceTimer);
                     const query = this.value.trim();
-
+            
                     if (query.length < 2) {
-                        searchDropdown.classList.add('d-none');
+                        hideDropdown();
                         return;
                     }
 
@@ -154,29 +155,25 @@
                     }, 300);
                 });
 
-                // 2. Отрисовка результатов (Адаптировано под твои модели UserModel и SongModel)
                 function renderSearchResults(data) {
                     searchDropdown.innerHTML = '';
-
-                    // Обрати внимание: читаем data.users (а не authors)
                     const hasUsers = data.users && data.users.length > 0;
                     const hasSongs = data.songs && data.songs.length > 0;
 
                     if (!hasUsers && !hasSongs) {
                         searchDropdown.innerHTML = '<div class="p-3 text-center text-muted small">Ничего не найдено</div>';
-                        searchDropdown.classList.remove('d-none');
+                        showDropdown();
                         return;
                     }
 
                     let html = '';
 
-                    // --- РЕНДЕР ПОЛЬЗОВАТЕЛЕЙ (UserModel) ---
+                    // Рендер Исполнителей
                     if (hasUsers) {
                         html += '<div class="dropdown-header fw-bold text-muted text-uppercase small pt-1 px-2">Исполнители</div>';
-                
                         data.users.forEach(user => {
                             html += `
-                                <a href="/Songs/${user.id}" class="dropdown-item d-flex align-items-center gap-3 py-2 rounded-3">
+                                <a href="/Songs/${user.id}" class="dropdown-item d-flex align-items-center gap-3 py-2 rounded-3 text-decoration-none">
                                     <i class="bi bi-person-circle fs-4 text-muted"></i>
                                     <div>
                                         <div class="fw-medium text-dark">${escapeHtml(user.name)}</div>
@@ -187,67 +184,72 @@
                         });
                     }
 
-                    // --- РЕНДЕР ПЕСЕН (SongModel) ---
+                    // Рендер Треков
                     if (hasSongs) {
                         if (hasUsers) html += '<hr class="my-2 opacity-10">';
                         html += '<div class="dropdown-header fw-bold text-muted text-uppercase small pt-1 px-2">Треки</div>';
-
                         data.songs.forEach(song => {
                             html += `
                                 <div class="dropdown-item d-flex align-items-center justify-content-between py-2 rounded-3" style="cursor: default;">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="bg-light rounded p-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <div class="d-flex align-items-center gap-3 overflow-hidden me-2">
+                                        <div class="bg-light rounded p-1 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
                                             <i class="bi bi-music-note text-accent"></i>
                                         </div>
-                                        <div>
-                                            <div class="fw-bold small text-dark mb-0">${escapeHtml(song.title)}</div>
-                                            <div class="text-muted" style="font-size: 0.75rem;">
+                                        <div class="text-truncate">
+                                            <div class="fw-bold small text-dark mb-0 text-truncate">${escapeHtml(song.title)}</div>
+                                            <div class="text-muted text-truncate" style="font-size: 0.75rem;">
                                                 ${escapeHtml(song.author)} • ${escapeHtml(song.album)}
                                             </div>
                                         </div>
                                     </div>
-                                    <span class="text-muted font-monospace small">${formatDuration(song.duration)}</span>
+                                    <span class="text-muted font-monospace small flex-shrink-0">${formatDuration(song.duration)}</span>
                                 </div>
                             `;
                         });
                     }
 
                     searchDropdown.innerHTML = html;
-                    searchDropdown.classList.remove('d-none');
+                    showDropdown();
                 }
 
-                // 3. Скрытие списка при клике вне его области
+                // Управление видимостью списка
+                function showDropdown() {
+                    searchDropdown.classList.remove('d-none');
+                    searchDropdown.classList.add('d-block');
+                }
+
+                function hideDropdown() {
+                    searchDropdown.classList.remove('d-block');
+                    searchDropdown.classList.add('d-none');
+                }
+
                 document.addEventListener('click', function (e) {
                     if (!searchContainer.contains(e.target)) {
-                        searchDropdown.classList.add('d-none');
+                        hideDropdown();
                     }
                 });
 
                 searchInput.addEventListener('focus', function () {
                     if (this.value.trim().length >= 2 && searchDropdown.innerHTML !== '') {
-                        searchDropdown.classList.remove('d-none');
+                        showDropdown();
                     }
                 });
 
-                // Защита от XSS
                 function escapeHtml(str) {
                     if (!str) return '';
                     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
                 }
 
-                // Парсинг TimeSpan (C# отдает формат "hh:mm:ss")
+                // ИСПРАВЛЕНО: восстановлена логика форматирования времени
                 function formatDuration(durationStr) {
                     if (!durationStr) return '';
                     const parts = durationStr.split(':');
                     if (parts.length === 3) {
-                        // Если часов 00, показываем только mm:ss
                         return parts[0] === "00" ? `${parts[1]}:${parts[2].substring(0,2)}` : durationStr.substring(0,8);
                     }
                     return durationStr;
                 }
             });
-
-
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)</body>
