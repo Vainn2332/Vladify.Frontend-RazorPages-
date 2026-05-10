@@ -26,6 +26,30 @@
                 font-weight: 500;
             }
             .hover-accent:hover { color: var(--accent) !important; transform: scale(1.1); transition: 0.2s; }
+            /* Анимация для кнопки "+" в поиске */
+.playlist-add-btn {
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; /* Плавная "пружинящая" анимация */
+    border-radius: 50% !important; /* Делаем кнопку идеально круглой */
+}
+
+.playlist-add-btn i {
+    transition: all 0.2s ease !important;
+}
+
+/* Эффекты при наведении */
+.playlist-add-btn:hover {
+    transform: scale(1.15); /* Чуть-чуть увеличиваем */
+    background-color: rgba(39, 184, 157, 0.1) !important; /* Делаем легкий цветной фон */
+}
+
+.playlist-add-btn:hover i {
+    color: var(--accent-color, #27b89d) !important; /* Подсвечиваем саму иконку плюса */
+}
+
+/* Эффект при нажатии */
+.playlist-add-btn:active {
+    transform: scale(0.95);
+}
     </style>
 </head>
 <body>
@@ -207,7 +231,7 @@
                                 
                                 <!-- ПОЛНОСТЬЮ КАСТОМНАЯ КНОПКА "+" И МЕНЮ -->
                                 <div class="position-relative me-1" style="overflow: visible;">
-                                    <button class="btn btn-sm btn-light p-1 border-0 d-flex align-items-center justify-content-center shadow-none"
+                                    <button class="btn btn-sm btn-light p-1 border-0 d-flex align-items-center justify-content-center shadow-none playlist-add-btn"
                                             type="button"
                                             onclick="togglePlaylistMenu(event, this)"
                                             style="width: 28px; height: 28px; background: transparent;">
