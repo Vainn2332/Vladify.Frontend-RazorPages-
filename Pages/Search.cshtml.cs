@@ -9,8 +9,12 @@ namespace Vladify.Frontend.Pages
     {
         public async Task<IActionResult> OnGetResultsAsync(string q, CancellationToken cancellationToken)
         {
+            if (string.IsNullOrWhiteSpace(q) || q.Length < 2)
+            {
+                return new JsonResult(new { songs = Array.Empty<object>(), users = Array.Empty<object>() });
+            }
+
             var accessToken = await HttpContext.GetTokenAsync("access_token");
-            // Твой SearchService вернет SearchResultDto
             var result = await searchService.SearchAsync(q, accessToken!, cancellationToken);
 
             return new JsonResult(result);
