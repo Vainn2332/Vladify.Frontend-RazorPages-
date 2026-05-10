@@ -40,7 +40,20 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                     </ul>
-
+                    <form class="d-flex mx-auto w-50" method="get" action="/Search">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 rounded-start-pill text-muted">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text"
+                                   name="query"
+                                   class="form-control border-start-0 rounded-end-pill shadow-none"
+                                   placeholder="Что будем слушать?"
+                                   value="@Context.Request.Query["query"]"
+                                   required>
+                            <button class="btn btn-outline-light d-none" type="submit">Искать</button>
+                        </div>
+                    </form>
                     <ul class="navbar-nav">
                         @{
                             var userPic = User.FindFirst("picture")?.Value;
