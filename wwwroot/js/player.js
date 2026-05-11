@@ -385,5 +385,7 @@ const PlayerApp = (function () {
         updateAllUI // Чтобы внешние скрипты могли вызвать обновление UI при изменении состояния
     };
 })();
+// Делаем доступным глобально
+window.PlayerApp = PlayerApp;
 
 document.addEventListener('DOMContentLoaded', () => PlayerApp.init());

@@ -169,7 +169,7 @@
                 if (errorMsg) showToast(errorMsg, 'error');
             });
 
-            // ==================== SEARCH ====================
+            // ==================== SEARCH & CACHE ====================
             window.searchResultsCache = [];
 
             document.addEventListener('DOMContentLoaded', () => {
@@ -208,38 +208,36 @@
                         return;
                     }
 
-                    // Сохраняем найденные песни в кеш для плеера
+                    // КЕШИРУЕМ ПЕСНИ (приводим к единому формату)
                     window.searchResultsCache = (data.songs || []).map(s => ({
-                        id: s.id,
-                        title: s.title,
-                        author: s.author,
-                        album: s.album || '',
-                        audioUrl: s.audioUrl,
-                        imageUrl: s.imageUrl || '',
-                        duration: s.duration || ''
+                        id: s.id || s.Id,
+                        title: s.title || s.Title || 'Неизвестно',
+                        author: s.author || s.Author || 'Неизвестно',
+                        album: s.album || s.Album || '',
+                        audioUrl: s.audioUrl || s.AudioUrl,
+                        imageUrl: s.imageUrl || s.ImageUrl || '',
+                        duration: s.duration || s.Duration || ''
                     }));
-
-                    console.log('Search results cache:', window.searchResultsCache);
 
                     let html = '';
 
-                    // ============ USERS ============
+                    // ============ ИСПОЛНИТЕЛИ ============
                     if (hasUsers) {
                         html += '<div class="dropdown-header fw-bold text-muted text-uppercase small pt-1 px-2">Исполнители</div>';
                         data.users.forEach(user => {
                             html += `
-                                <a href="/Songs/${user.id}" class="dropdown-item d-flex align-items-center gap-3 py-2 rounded-3 text-decoration-none">
+                                <a href="/Songs/${user.id || user.Id}" class="dropdown-item d-flex align-items-center gap-3 py-2 rounded-3 text-decoration-none">
                                     <i class="bi bi-person-circle fs-4 text-muted"></i>
                                     <div>
-                                        <div class="fw-medium text-dark">${escapeHtml(user.name)}</div>
-                                        <div class="text-muted small" style="font-size: 0.7rem;">${escapeHtml(user.emailAddress)}</div>
+                                        <div class="fw-medium text-dark">${escapeHtml(user.name || user.Name)}</div>
+                                        <div class="text-muted small" style="font-size: 0.7rem;">${escapeHtml(user.emailAddress || user.EmailAddress)}</div>
                                     </div>
                                 </a>
                             `;
                         });
                     }
 
-                    // ============ SONGS ============
+                    // ============ ТРЕКИ ============
                     if (hasSongs) {
                         if (hasUsers) html += '<hr class="my-2 opacity-10">';
                         html += '<div class="dropdown-header fw-bold text-muted text-uppercase small pt-1 px-2">Треки</div>';
@@ -252,10 +250,10 @@
                                         <form method="post" action="/Search?handler=AddToPlaylist" class="m-0">
                                             <input type="hidden" name="__RequestVerificationToken" value="${csrfToken}" />
                                             <input type="hidden" name="songId" value="SONG_ID_PLACEHOLDER" />
-                                            <input type="hidden" name="playlistId" value="${pl.id}" />
+                                            <input type="hidden" name="playlistId" value="${pl.id || pl.Id}" />
                                             <input type="hidden" name="returnUrl" value="${currentUrl}" />
                                             <button type="submit" class="btn btn-sm btn-light w-100 text-start text-truncate small py-1" style="max-width: 180px; background: transparent;">
-                                                ${escapeHtml(pl.name)}
+                                                ${escapeHtml(pl.name || pl.Name)}
                                             </button>
                                         </form>
                                     </div>
@@ -265,10 +263,10 @@
                             playlistsHtml = '<div class="p-2 text-muted small text-center">Нет плейлистов</div>';
                         }
 
-                        data.songs.forEach((song, idx) => {
+                        // Рендерим треки, передаем событие event в onclick
+                        window.searchResultsCache.forEach((song, idx) => {
                             const currentSongPlaylistsHtml = playlistsHtml.replace(/SONG_ID_PLACEHOLDER/g, song.id);
 
-                            // Обложка трека
                             const cover = song.imageUrl
                                 ? `<img src="${escapeHtml(song.imageUrl)}" alt="" class="rounded shadow-sm flex-shrink-0" style="width: 38px; height: 38px; object-fit: cover;" />`
                                 : `<div class="bg-light rounded p-1 d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 38px; height: 38px;">
@@ -278,7 +276,7 @@
                             html += `
                                 <div class="dropdown-item d-flex align-items-center justify-content-between py-2 rounded-3 search-song-item"
                                      style="cursor: pointer; overflow: visible;"
-                                     onclick="playSearchSong(${idx})">
+                                     onclick="window.playSearchSong(${idx}, event)">
 
                                     <div class="d-flex align-items-center gap-2 me-2" style="overflow: visible; flex: 1; min-width: 0;">
 
@@ -286,7 +284,7 @@
                                         <div class="position-relative" style="overflow: visible;">
                                             <button class="btn btn-sm btn-light p-1 border-0 d-flex align-items-center justify-content-center shadow-none playlist-add-btn"
                                                     type="button"
-                                                    onclick="togglePlaylistMenu(event, this)"
+                                                    onclick="window.togglePlaylistMenu(event, this)"
                                                     style="width: 28px; height: 28px; background: transparent;">
                                                 <i class="bi bi-plus-lg fs-5 text-muted" style="pointer-events: none;"></i>
                                             </button>
@@ -328,11 +326,9 @@
                 }
 
                 document.addEventListener('click', function (e) {
-                    // Закрываем подменю плейлистов
                     if (!e.target.closest('.playlist-add-btn') && !e.target.closest('.playlist-submenu')) {
                         document.querySelectorAll('.playlist-submenu').forEach(menu => menu.classList.add('d-none'));
                     }
-                    // Закрываем дропдаун поиска
                     if (!searchContainer.contains(e.target)) {
                         hideDropdown();
                     }
@@ -358,35 +354,44 @@
                 }
             });
 
-            // ==================== PLAY FROM SEARCH ====================
-            function playSearchSong(idx) {
-                if (!window.PlayerApp) {
-                    console.error('PlayerApp не загружен!');
-                    return;
-                }
-
-                if (!window.searchResultsCache || window.searchResultsCache.length === 0) {
-                    console.error('Кеш поиска пуст!');
-                    return;
-                }
-
-                // Устанавливаем плейлист из результатов поиска
-                PlayerApp.setPlaylist(window.searchResultsCache);
-
-                // Воспроизводим выбранную песню
-                PlayerApp.playSongByIndex(idx);
+            // ==================== ГЛОБАЛЬНЫЙ ЗАПУСК ВОСПРОИЗВЕДЕНИЯ ====================
+            // Привязываем функции жёстко к window, чтобы HTML точно их увидел
+                  window.playSearchSong = function (idx, event) {
+            if (event) {
+                event.preventDefault();
             }
 
-            function togglePlaylistMenu(event, button) {
+            console.log("🔥 Клик по треку из поиска! Индекс:", idx);
+
+            // Проверяем и window.PlayerApp, и обычный PlayerApp
+            const playerObj = window.PlayerApp || (typeof PlayerApp !== 'undefined' ? PlayerApp : null);
+
+            if (!playerObj) {
+                console.error('ОШИБКА: Объект PlayerApp не найден! Проверь, загрузился ли player.js');
+                return;
+            }
+
+            const songToPlay = window.searchResultsCache[idx];
+            console.log("🎵 Загружаем в плеер:", songToPlay);
+
+            // Передаём все найденные треки в качестве текущего плейлиста плеера
+            playerObj.setPlaylist(window.searchResultsCache);
+
+            // Запускаем песню
+            playerObj.playSongByIndex(idx);
+            };
+
+            window.togglePlaylistMenu = function (event, button) {
                 event.preventDefault();
-                event.stopPropagation();
+                event.stopPropagation(); // Блокируем клик, чтобы песня НЕ начала играть при нажатии на "+"
+        
                 const submenu = button.nextElementSibling;
                 const isCurrentlyHidden = submenu.classList.contains('d-none');
                 document.querySelectorAll('.playlist-submenu').forEach(menu => menu.classList.add('d-none'));
                 if (isCurrentlyHidden) {
                     submenu.classList.remove('d-none');
                 }
-            }
+            };
     </script>
     @await RenderSectionAsync("Scripts", required: false)</body>
 </html>
