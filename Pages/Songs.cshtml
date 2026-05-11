@@ -35,7 +35,7 @@
         </div>
 
         <div class="d-flex align-items-center mb-4">
-            <button class="btn-vladify-play paused shadow-lg" onclick="togglePlayMain(this)" type="button">
+            <button class="btn-vladify-play paused shadow-lg" id="mainPlayBtn" onclick="PlayerApp.togglePlayAll()" type="button">
                 <svg class="vladify-play-svg vladify-symbol-paused" viewBox="0 0 16 16" width="40" height="40">
                   <path fill="black" d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
                 </svg>
@@ -46,91 +46,114 @@
         </div>
 
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-5">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0 custom-table" style="table-layout: fixed;">
-            <thead class="bg-light text-muted small text-uppercase fw-bold">
-                <tr>
-                    <th class="ps-4 py-3" style="width: 80px;">#</th>
-                    <th style="width: 45%;">Название</th>
-                    <th style="width: 40%;">Альбом</th>
-                    <th class="text-end pe-4" style="width: 100px;"><i class="bi bi-clock fs-6"></i></th>
-                </tr>
-            </thead>
-            <tbody>
-                @{ int i = 1; }
-                @foreach (var song in Model.Songs)
-                {
-                    <tr class="song-row">
-                        <!-- Номер + Плюсик -->
-                        <td class="ps-4">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="text-muted fw-medium">@i</span>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 custom-table" style="table-layout: fixed;">
+                    <thead class="bg-light text-muted small text-uppercase fw-bold">
+                        <tr>
+                            <th class="ps-4 py-3" style="width: 100px;">#</th>
+                            <th style="width: 45%;">Название</th>
+                            <th style="width: 35%;">Альбом</th>
+                            <th class="text-end pe-4" style="width: 100px;"><i class="bi bi-clock fs-6"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ int i = 0; }
+                        @foreach (var song in Model.Songs)
+                        {
+                            <tr class="song-row"
+                                data-song-index="@i"
+                                data-song-id="@song.Id"
+                                data-song-title="@song.Title"
+                                data-song-author="@Model.Owner.Name"
+                                data-song-album="@song.Album"
+                                data-song-audio="@song.AudioUrl"
+                                data-song-image="@song.ImageUrl"
+                                data-song-duration="@song.Duration"
+                                onclick="PlayerApp.onRowClick(@i)">
 
-                                <!-- Кнопка с плюсиком -->
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary border-0 p-1 dropdown-toggle" 
-                                            type="button" 
-                                            data-bs-toggle="dropdown" 
-                                            aria-expanded="false"
-                                            style="box-shadow: none;">
-                                        <i class="bi bi-plus-lg fs-5"></i>
-                                    </button>
+                                <!-- Номер + Плюсик -->
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="song-row-number" style="min-width: 24px;">
+                                            <span class="row-num text-muted fw-medium">@(i + 1)</span>
+                                            <i class="bi bi-play-fill row-play-icon"></i>
+                                            <i class="bi bi-pause-fill row-pause-icon"></i>
+                                        </div>
 
-                                    <ul class="dropdown-menu shadow-sm">
-                                        @if (Model.UserPlaylists.Any())
+                                        <!-- Кнопка с плюсиком -->
+                                        <div class="dropdown" onclick="event.stopPropagation()">
+                                            <button class="btn btn-sm btn-outline-secondary border-0 p-1 dropdown-toggle"
+                                                    type="button"
+                                                    data-bs-toggle="dropdown"
+                                                    aria-expanded="false"
+                                                    style="box-shadow: none;">
+                                                <i class="bi bi-plus-lg fs-5"></i>
+                                            </button>
+
+                                            <ul class="dropdown-menu shadow-sm">
+                                                @if (Model.UserPlaylists.Any())
+                                                {
+                                                    @foreach (var playlist in Model.UserPlaylists)
+                                                    {
+                                                        <li>
+                                                            <form method="post" asp-page-handler="AddToPlaylist"
+                                                                  asp-route-userId="@Model.Owner.Id"
+                                                                  asp-route-songId="@song.Id"
+                                                                  asp-route-playlistId="@playlist.Id">
+                                                                <button type="submit" class="dropdown-item">
+                                                                    @playlist.Name
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <li><span class="dropdown-item-text text-muted">У вас нет плейлистов</span></li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="d-flex align-items-center py-1">
+                                        @if (!string.IsNullOrEmpty(song.ImageUrl))
                                         {
-                                            @foreach (var playlist in Model.UserPlaylists)
-                                            {
-                                                <li>
-                                                    <form method="post" asp-page-handler="AddToPlaylist" 
-                                                    asp-route-userId="@Model.Owner.Id"
-                                                    asp-route-songId="@song.Id"
-                                                    asp-route-playlistId="@playlist.Id">
-                                                        <button type="submit" class="dropdown-item">
-                                                            @playlist.Name
-                                                        </button>
-                                                    </form>
-                                                </li>
-                                            }
+                                            <img src="@song.ImageUrl"
+                                                 alt="@song.Title"
+                                                 class="song-cover-img me-3 rounded shadow-sm" />
                                         }
                                         else
                                         {
-                                            <li><span class="dropdown-item-text text-muted">У вас нет плейлистов</span></li>
+                                            <div class="song-icon-placeholder me-3 rounded shadow-sm d-flex align-items-center justify-content-center">
+                                                <i class="bi bi-music-note text-accent fs-5"></i>
+                                            </div>
                                         }
-                                    </ul>
-                                </div>
-                            </div>
-                        </td>
-
-                        <td>
-                            <div class="d-flex align-items-center py-1">
-                                <div class="song-icon-placeholder me-3 rounded shadow-sm d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-music-note text-accent fs-5"></i>
-                                </div>
-                                <div>
-                                    <div class="fw-bold song-title fs-6">@song.Title</div>
-                                    <div class="text-muted small">@Model.Owner.Name</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="text-muted small">@song.Album</td>
-                        <td class="text-end pe-4 text-muted small mono">
-                            @FormatDuration(song.Duration)
-                        </td>
-                    </tr>
-                    i++;
-                }
-            </tbody>
-        </table>
-    </div>
-    @if (!Model.Songs.Any())
-    {
-        <div class="text-center py-5">
-            <i class="bi bi-music-note-beamed display-1 text-muted opacity-25 mb-3 d-block"></i>
-            <p class="text-muted fs-5 fw-medium">У этого пользователя пока нет добавленных песен.</p>
+                                        <div>
+                                            <div class="fw-bold song-title fs-6">@song.Title</div>
+                                            <div class="text-muted small">@Model.Owner.Name</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-muted small">@song.Album</td>
+                                <td class="text-end pe-4 text-muted small mono">
+                                    @FormatDuration(song.Duration)
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+            @if (!Model.Songs.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-music-note-beamed display-1 text-muted opacity-25 mb-3 d-block"></i>
+                    <p class="text-muted fs-5 fw-medium">У этого пользователя пока нет добавленных песен.</p>
+                </div>
+            }
         </div>
-    }
-</div>
     }
 </div>
 
@@ -145,10 +168,11 @@
 
 @section Scripts {
     <script>
-        function togglePlayMain(button) {
-            button.classList.toggle('playing');
-            button.classList.toggle('paused');
-        }
+        // Загружаем плейлист в глобальный плеер
+        PlayerApp.loadPlaylistFromRows();
+
+        // Обновляем UI плеера, если уже что-то играет
+        PlayerApp.updateAllUI(PlayerApp.isPlaying());
     </script>
 }
 
@@ -164,15 +188,15 @@
         height: 170px;
     }
 
-    .playlist-hero-cover.grad-blue {
-        background: linear-gradient(135deg, #5dade2 0%, #3498db 100%); 
-    }
+        .playlist-hero-cover.grad-blue {
+            background: linear-gradient(135deg, #5dade2 0%, #3498db 100%);
+        }
 
     .btn-vladify-play {
         width: 64px;
         height: 64px;
         border-radius: 50%;
-        background: var(--vladify-btn-grad); 
+        background: var(--vladify-btn-grad);
         border: none;
         display: flex;
         align-items: center;
@@ -182,14 +206,14 @@
     }
 
     .vladify-play-svg {
-        display: none; 
-        width: 40px; 
+        display: none;
+        width: 40px;
         height: 40px;
     }
 
     .btn-vladify-play.paused .vladify-symbol-paused {
         display: block;
-        margin-left: 5px; 
+        margin-left: 5px;
     }
 
     .btn-vladify-play.playing .vladify-symbol-playing {
@@ -206,28 +230,49 @@
         transform: scale(0.95);
     }
 
-    .custom-table thead th { 
-        border-bottom: none; 
-        font-size: 0.7rem; 
-        color: #adb5bd; 
+    .custom-table thead th {
+        border-bottom: none;
+        font-size: 0.7rem;
+        color: #adb5bd;
     }
-    
-    .song-row { transition: background-color 0.2s; }
-    .song-row:hover { background-color: rgba(116, 185, 255, 0.05) !important; }
-    .song-row:hover .song-title { color: var(--accent-color); }
+
+    .song-row {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+        .song-row:hover {
+            background-color: rgba(116, 185, 255, 0.05) !important;
+        }
+
+            .song-row:hover .song-title {
+                color: var(--accent-color);
+            }
+
+    /* ===== ОБЛОЖКА ПЕСНИ — КРИТИЧНО! ===== */
+    .song-cover-img {
+        width: 38px !important;
+        height: 38px !important;
+        object-fit: cover;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        flex-shrink: 0;
+    }
 
     .song-icon-placeholder {
         width: 38px;
         height: 38px;
         background-color: #f8f9fa;
-        border: 1px solid rgba(0,0,0,0.02);
+        border: 1px solid rgba(0, 0, 0, 0.02);
+        flex-shrink: 0;
     }
 
-    .text-accent { color: var(--accent-color); }
-    
-    .mono { 
-        font-family: 'SFMono-Regular', Consolas, monospace; 
-        letter-spacing: -0.5px; 
+    .text-accent {
+        color: var(--accent-color);
+    }
+
+    .mono {
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        letter-spacing: -0.5px;
     }
 
     .alert-soft-warning {
@@ -235,4 +280,70 @@
         border: 1px solid #ffec99;
         color: #f08c00;
     }
+
+    /* ===== ИКОНКИ В НОМЕРЕ СТРОКИ (Play/Pause/Number) ===== */
+    .song-row-number {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 24px;
+    }
+
+    .row-play-icon,
+    .row-pause-icon {
+        display: none;
+        font-size: 1rem;
+    }
+
+    .row-num {
+        display: inline;
+    }
+
+    /* Hover на обычной строке — показываем play */
+    .song-row:hover .row-num {
+        display: none;
+    }
+
+    .song-row:hover .row-play-icon {
+        display: inline;
+        color: var(--accent-color);
+    }
+
+    /* Активная играющая песня */
+    .song-row.playing-song .row-num {
+        display: none;
+    }
+
+    .song-row.playing-song .row-play-icon {
+        display: none !important;
+    }
+
+    .song-row.playing-song .row-pause-icon {
+        display: inline;
+        color: #41d3b7;
+    }
+
+    /* Активная песня на паузе */
+    .song-row.paused-song .row-num {
+        display: none;
+    }
+
+    .song-row.paused-song .row-pause-icon {
+        display: none !important;
+    }
+
+    .song-row.paused-song .row-play-icon {
+        display: inline;
+        color: #41d3b7;
+    }
+
+    /* Подсветка активной строки */
+    .song-row.active-song {
+        background-color: rgba(65, 211, 183, 0.06) !important;
+    }
+
+        .song-row.active-song .song-title {
+            color: #41d3b7 !important;
+        }
 </style>
