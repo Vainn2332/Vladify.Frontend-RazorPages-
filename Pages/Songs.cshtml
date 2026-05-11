@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div class="col pb-1">
-                <div id="playlistNameContainer" class="d-flex align-items-center">
+                <div class="d-flex align-items-center">
                     <h1 class="display-4 fw-bold mb-1 mt-0">@Model.Owner.Name</h1>
                 </div>
 
@@ -37,27 +37,29 @@
         <div class="d-flex align-items-center mb-4">
             <button class="btn-vladify-play paused shadow-lg" id="mainPlayBtn" onclick="PlayerApp.togglePlayAll()" type="button">
                 <svg class="vladify-play-svg vladify-symbol-paused" viewBox="0 0 16 16" width="40" height="40">
-                  <path fill="black" d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+                    <path fill="black" d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z" />
                 </svg>
                 <svg class="vladify-play-svg vladify-symbol-playing" viewBox="0 0 16 16" width="40" height="40">
-                  <path fill="black" d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/>
+                    <path fill="black" d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z" />
                 </svg>
             </button>
         </div>
 
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-5">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 custom-table" style="table-layout: fixed;">
+                <table class="table table-hover align-middle mb-0 custom-table">
                     <thead class="bg-light text-muted small text-uppercase fw-bold">
                         <tr>
-                            <th class="ps-4 py-3" style="width: 100px;">#</th>
-                            <th style="width: 45%;">Название</th>
-                            <th style="width: 35%;">Альбом</th>
-                            <th class="text-end pe-4" style="width: 100px;"><i class="bi bi-clock fs-6"></i></th>
+                            <th class="ps-4 py-3" style="width: 110px;">#</th>
+                            <th>Название</th>
+                            <th>Альбом</th>
+                            <th class="text-end pe-4" style="width: 100px;"><i class="bi bi-clock"></i></th>
                         </tr>
                     </thead>
                     <tbody>
-                        @{ int i = 0; }
+                        @{
+                            int i = 0;
+                        }
                         @foreach (var song in Model.Songs)
                         {
                             <tr class="song-row"
@@ -72,10 +74,10 @@
                                 onclick="PlayerApp.onRowClick(@i)">
 
                                 <!-- Номер + Плюсик -->
-                                <td class="ps-4">
+                                <td class="ps-4 text-muted">
                                     <div class="d-flex align-items-center gap-2">
-                                        <div class="song-row-number" style="min-width: 24px;">
-                                            <span class="row-num text-muted fw-medium">@(i + 1)</span>
+                                        <div class="song-row-number">
+                                            <span class="row-num">@(i + 1)</span>
                                             <i class="bi bi-play-fill row-play-icon"></i>
                                             <i class="bi bi-pause-fill row-pause-icon"></i>
                                         </div>
@@ -122,12 +124,12 @@
                                         {
                                             <img src="@song.ImageUrl"
                                                  alt="@song.Title"
-                                                 class="song-cover-img me-3 rounded shadow-sm" />
+                                                 class="song-cover-img me-3" />
                                         }
                                         else
                                         {
-                                            <div class="song-icon-placeholder me-3 rounded shadow-sm d-flex align-items-center justify-content-center">
-                                                <i class="bi bi-music-note text-accent fs-5"></i>
+                                            <div class="song-icon-placeholder me-3">
+                                                <i class="bi bi-music-note text-accent"></i>
                                             </div>
                                         }
                                         <div>
@@ -136,7 +138,9 @@
                                         </div>
                                     </div>
                                 </td>
+
                                 <td class="text-muted small">@song.Album</td>
+
                                 <td class="text-end pe-4 text-muted small mono">
                                     @FormatDuration(song.Duration)
                                 </td>
@@ -230,6 +234,13 @@
         transform: scale(0.95);
     }
 
+    .alert-soft-warning {
+        background-color: #fff9db;
+        border: 1px solid #ffec99;
+        color: #f08c00;
+    }
+
+    /* ===== TABLE ===== */
     .custom-table thead th {
         border-bottom: none;
         font-size: 0.7rem;
@@ -267,6 +278,9 @@
         border: 1px solid rgba(0, 0, 0, 0.05);
         border-radius: 6px;
         flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
         .song-icon-placeholder .bi {
@@ -280,12 +294,6 @@
     .mono {
         font-family: 'SFMono-Regular', Consolas, monospace;
         letter-spacing: -0.5px;
-    }
-
-    .alert-soft-warning {
-        background-color: #fff9db;
-        border: 1px solid #ffec99;
-        color: #f08c00;
     }
 
     /* ===== ИКОНКИ В НОМЕРЕ СТРОКИ ===== */
@@ -307,6 +315,7 @@
         display: inline;
     }
 
+    /* Hover на обычной строке — показываем play */
     .song-row:hover .row-num {
         display: none;
     }
@@ -316,6 +325,7 @@
         color: var(--accent-color);
     }
 
+    /* Активная играющая песня */
     .song-row.playing-song .row-num {
         display: none;
     }
@@ -329,6 +339,7 @@
         color: #41d3b7;
     }
 
+    /* Активная песня на паузе */
     .song-row.paused-song .row-num {
         display: none;
     }
@@ -342,6 +353,7 @@
         color: #41d3b7;
     }
 
+    /* Подсветка активной строки */
     .song-row.active-song {
         background-color: rgba(65, 211, 183, 0.06) !important;
     }
