@@ -58,41 +58,50 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @{ int i = 1; }
-                        @foreach (var song in Model.Songs)
-                        {
-                            <tr class="song-row">
-                                <td class="ps-4 text-muted">@i</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="song-icon-placeholder me-3 rounded shadow-sm d-flex align-items-center justify-content-center">
-                                            <i class="bi bi-music-note text-accent"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold song-title">@song.Title</div>
-                                            <div class="text-muted small">@song.Author</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="text-muted small">@song.Album</td>
-                                <td class="text-end text-muted small mono">
-                                    @FormatDuration(song.Duration)
-                                </td>
-                                <td class="text-end pe-4">
-                                    <button type="button" 
-                                            class="btn-delete-song" 
-                                            title="Удалить"
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#confirmDeleteModal"
-                                            data-song-id="@song.Id"
-                                            data-song-title="@song.Title">
-                                        <i class="bi bi-trash3"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            i++;
-                        }
-                    </tbody>
+    @{ int i = 1; }
+    @foreach (var song in Model.Songs)
+    {
+        <tr class="song-row">
+            <td class="ps-4 text-muted">@i</td>
+            <td>
+                <div class="d-flex align-items-center">
+                    @if (!string.IsNullOrEmpty(song.ImageUrl))
+                    {
+                        <img src="@song.ImageUrl" 
+                             alt="@song.Title" 
+                             class="song-cover-img me-3 rounded shadow-sm" />
+                    }
+                    else
+                    {
+                        <div class="song-icon-placeholder me-3 rounded shadow-sm d-flex align-items-center justify-content-center">
+                            <i class="bi bi-music-note text-accent"></i>
+                        </div>
+                    }
+                    <div>
+                        <div class="fw-bold song-title">@song.Title</div>
+                        <div class="text-muted small">@song.Author</div>
+                    </div>
+                </div>
+            </td>
+            <td class="text-muted small">@song.Album</td>
+            <td class="text-end text-muted small mono">
+                @FormatDuration(song.Duration)
+            </td>
+            <td class="text-end pe-4">
+                <button type="button" 
+                        class="btn-delete-song" 
+                        title="Удалить"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#confirmDeleteModal"
+                        data-song-id="@song.Id"
+                        data-song-title="@song.Title">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </td>
+        </tr>
+        i++;
+    }
+</tbody>
                 </table>
             </div>
             @if (!Model.Songs.Any())
@@ -560,4 +569,11 @@
         background: rgba(255, 71, 87, 0.18);
         transform: scale(1.1);
     }
+    .song-cover-img {
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
 </style>
