@@ -70,7 +70,7 @@
                                 data-song-audio="@song.AudioUrl"
                                 data-song-image="@song.ImageUrl"
                                 data-song-duration="@song.Duration"
-                                onclick="playSongByIndex(@i)">
+                                onclick="onRowClick(@i, event)">
                                 <td class="ps-4 text-muted song-row-number">
                                     <span class="row-num">@(i + 1)</span>
                                     <i class="bi bi-play-fill row-play-icon"></i>
@@ -234,7 +234,7 @@
 <!-- ============ PLAYER BAR ============ -->
 <div class="player-bar" id="playerBar">
     <div class="player-inner">
-        <!-- Left: Song info -->
+        <!-- Left -->
         <div class="player-left">
             <img src="" alt="" class="player-cover" id="playerCover" />
             <div class="player-song-info">
@@ -243,12 +243,9 @@
             </div>
         </div>
 
-        <!-- Center: Controls + progress -->
+        <!-- Center -->
         <div class="player-center">
             <div class="player-controls">
-                <button class="player-ctrl-btn" id="btnShuffle" onclick="toggleShuffle()" title="Перемешать">
-                    <i class="bi bi-shuffle"></i>
-                </button>
                 <button class="player-ctrl-btn" id="btnPrev" onclick="playPrev()" title="Предыдущая">
                     <i class="bi bi-skip-start-fill"></i>
                 </button>
@@ -259,13 +256,10 @@
                 <button class="player-ctrl-btn" id="btnNext" onclick="playNext()" title="Следующая">
                     <i class="bi bi-skip-end-fill"></i>
                 </button>
-                <button class="player-ctrl-btn" id="btnRepeat" onclick="toggleRepeat()" title="Повтор">
-                    <i class="bi bi-arrow-repeat"></i>
-                </button>
             </div>
             <div class="player-progress-row">
                 <span class="player-time" id="playerCurrentTime">0:00</span>
-                <div class="player-progress-bar" id="progressBarContainer" onclick="seekTo(event)">
+                <div class="player-progress-bar" id="progressBarContainer">
                     <div class="player-progress-bg">
                         <div class="player-progress-fill" id="progressFill"></div>
                     </div>
@@ -275,13 +269,13 @@
             </div>
         </div>
 
-        <!-- Right: Volume -->
+        <!-- Right -->
         <div class="player-right">
             <button class="player-ctrl-btn" id="btnVolume" onclick="toggleMute()" title="Громкость">
                 <i class="bi bi-volume-up-fill" id="iconVolumeUp"></i>
                 <i class="bi bi-volume-mute-fill d-none" id="iconVolumeMute"></i>
             </button>
-            <div class="player-volume-bar" id="volumeBarContainer" onclick="setVolume(event)">
+            <div class="player-volume-bar" id="volumeBarContainer">
                 <div class="player-volume-bg">
                     <div class="player-volume-fill" id="volumeFill" style="width:100%"></div>
                 </div>
@@ -289,7 +283,6 @@
             </div>
         </div>
     </div>
-
     <audio id="audioPlayer" preload="metadata"></audio>
 </div>
 
@@ -304,14 +297,11 @@
 
 @section Scripts {
     <script>
-        // ==================== PLAYER STATE ====================
+        // ==================== STATE ====================
         const audio = document.getElementById('audioPlayer');
         let currentIndex = -1;
-        let isShuffled = false;
-        let repeatMode = 0; // 0=off, 1=all, 2=one
         let savedVolume = 1;
 
-        // Build song list from DOM
         const songRows = document.querySelectorAll('.song-row[data-song-audio]');
         const songs = Array.from(songRows).map((row, idx) => ({
             index: idx,
@@ -324,7 +314,27 @@
             duration: row.dataset.songDuration
         }));
 
-        let playOrder = songs.map((_, i) => i);
+        // ==================== ROW CLICK ====================
+        function onRowClick(idx, event) {
+            // Если кликнули по той же песне которая играет — ставим на паузу
+            if (idx === currentIndex && !audio.paused) {
+                audio.pause();
+                showPlayIcon();
+                syncMainPlayBtn(false);
+                highlightRow(currentIndex);
+                return;
+            }
+            // Если кликнули по той же песне которая на паузе — продолжаем
+            if (idx === currentIndex && audio.paused) {
+                audio.play();
+                showPauseIcon();
+                syncMainPlayBtn(true);
+                highlightRow(currentIndex);
+                return;
+            }
+            // Новая песня
+            playSongByIndex(idx);
+        }
 
         // ==================== PLAY SONG ====================
         function playSongByIndex(idx) {
@@ -333,25 +343,17 @@
             const song = songs[idx];
             currentIndex = idx;
 
-            // Update audio
             audio.src = song.audioUrl;
             audio.play();
 
-            // Update player bar UI
             document.getElementById('playerCover').src = song.imageUrl || '';
             document.getElementById('playerTitle').textContent = song.title;
             document.getElementById('playerAuthor').textContent = song.author;
 
-            // Show player bar
             document.getElementById('playerBar').classList.add('visible');
 
-            // Update play/pause icons
             showPauseIcon();
-
-            // Highlight active row
             highlightRow(idx);
-
-            // Sync main play button
             syncMainPlayBtn(true);
         }
 
@@ -375,13 +377,9 @@
 
         function playNext() {
             if (songs.length === 0) return;
-            const orderIdx = playOrder.indexOf(currentIndex);
-            let nextOrderIdx = orderIdx + 1;
-            if (nextOrderIdx >= playOrder.length) {
-                if (repeatMode >= 1) nextOrderIdx = 0;
-                else { audio.pause(); showPlayIcon(); syncMainPlayBtn(false); return; }
-            }
-            playSongByIndex(playOrder[nextOrderIdx]);
+            let next = currentIndex + 1;
+            if (next >= songs.length) next = 0;
+            playSongByIndex(next);
         }
 
         function playPrev() {
@@ -390,40 +388,11 @@
                 audio.currentTime = 0;
                 return;
             }
-            const orderIdx = playOrder.indexOf(currentIndex);
-            let prevOrderIdx = orderIdx - 1;
-            if (prevOrderIdx < 0) prevOrderIdx = playOrder.length - 1;
-            playSongByIndex(playOrder[prevOrderIdx]);
+            let prev = currentIndex - 1;
+            if (prev < 0) prev = songs.length - 1;
+            playSongByIndex(prev);
         }
 
-        function toggleShuffle() {
-            isShuffled = !isShuffled;
-            document.getElementById('btnShuffle').classList.toggle('active', isShuffled);
-            if (isShuffled) {
-                playOrder = [...songs.keys()];
-                // Fisher-Yates shuffle, keep current song first
-                for (let i = playOrder.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [playOrder[i], playOrder[j]] = [playOrder[j], playOrder[i]];
-                }
-                if (currentIndex >= 0) {
-                    const ci = playOrder.indexOf(currentIndex);
-                    if (ci > 0) [playOrder[0], playOrder[ci]] = [playOrder[ci], playOrder[0]];
-                }
-            } else {
-                playOrder = songs.map((_, i) => i);
-            }
-        }
-
-        function toggleRepeat() {
-            repeatMode = (repeatMode + 1) % 3;
-            const btn = document.getElementById('btnRepeat');
-            btn.classList.toggle('active', repeatMode > 0);
-            btn.querySelector('i').className = repeatMode === 2
-                ? 'bi bi-repeat-1' : 'bi bi-arrow-repeat';
-        }
-
-        // ==================== TOGGLE PLAY ALL ====================
         function togglePlayAll(button) {
             if (audio.paused || currentIndex < 0) {
                 if (currentIndex < 0 && songs.length > 0) {
@@ -441,7 +410,7 @@
             highlightRow(currentIndex);
         }
 
-        // ==================== PROGRESS BAR ====================
+        // ==================== PROGRESS ====================
         audio.addEventListener('timeupdate', () => {
             if (!audio.duration) return;
             const pct = (audio.currentTime / audio.duration) * 100;
@@ -455,12 +424,7 @@
         });
 
         audio.addEventListener('ended', () => {
-            if (repeatMode === 2) {
-                audio.currentTime = 0;
-                audio.play();
-            } else {
-                playNext();
-            }
+            playNext();
         });
 
         function seekTo(e) {
@@ -470,7 +434,6 @@
             if (audio.duration) audio.currentTime = pct * audio.duration;
         }
 
-        // Progress bar drag
         (function () {
             const bar = document.getElementById('progressBarContainer');
             let dragging = false;
@@ -507,7 +470,6 @@
             document.getElementById('iconVolumeMute').classList.toggle('d-none', vol > 0);
         }
 
-        // Volume drag
         (function () {
             const bar = document.getElementById('volumeBarContainer');
             let dragging = false;
@@ -541,6 +503,7 @@
                 const isPlaying = isActive && !audio.paused;
                 row.classList.toggle('active-song', isActive);
                 row.classList.toggle('playing-song', isPlaying);
+                row.classList.toggle('paused-song', isActive && audio.paused);
             });
         }
 
@@ -559,7 +522,7 @@
             document.getElementById('songTitleToDelete').textContent = button.getAttribute('data-song-title');
         });
 
-        // ==================== UPLOAD ZONES ====================
+        // ==================== UPLOAD ====================
         function formatFileSize(bytes) {
             if (bytes < 1024) return bytes + ' B';
             if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
@@ -621,16 +584,21 @@
 <style>
     :root {
         --accent-color: #74b9ff;
-        --vladify-green: #1db954;
-        --vladify-green-hover: #1ed760;
+        --vladify-green: #41d3b7;
+        --vladify-green-hover: #51e3c7;
         --vladify-btn-grad: linear-gradient(135deg, #41d3b7 0%, #27b89d 100%);
         --vladify-btn-hover: linear-gradient(135deg, #51e3c7 0%, #2cccae 100%);
-        --player-height: 80px;
+        --player-height: 120px;
+        --player-bg: #1a1a2e;
+        --player-border: #25254a;
+        --player-text: #e0e0e0;
+        --player-text-muted: #8a8ab0;
+        --player-bar-bg: #3a3a5c;
+        --player-bar-fill: #74b9ff;
+        --player-bar-hover: #41d3b7;
     }
 
-    /* Padding bottom so content isn't hidden behind player */
     .pb-player { padding-bottom: calc(var(--player-height) + 24px); }
-
     .playlist-hero-cover { width: 170px; height: 170px; }
 
     /* ==================== TABLE ==================== */
@@ -639,18 +607,28 @@
     .song-row:hover { background-color: rgba(116, 185, 255, 0.05) !important; }
     .song-row:hover .song-title { color: var(--accent-color); }
 
-    /* Row number / play / pause icons */
-    .song-row-number { position: relative; }
-    .row-play-icon, .row-pause-icon { display: none; font-size: 1.1rem; }
+    .song-row-number { position: relative; min-width: 28px; }
+    .row-play-icon, .row-pause-icon { display: none; font-size: 1.1rem; cursor: pointer; }
+    .row-num { display: inline; }
+
     .song-row:hover .row-num { display: none; }
-    .song-row:hover .row-play-icon { display: inline; color: #fff; }
+    .song-row:hover .row-play-icon { display: inline; color: var(--accent-color); }
+
     .song-row.playing-song .row-num { display: none; }
     .song-row.playing-song .row-play-icon { display: none !important; }
     .song-row.playing-song .row-pause-icon { display: inline; color: var(--vladify-green); }
-    .song-row:hover.playing-song .row-pause-icon { display: inline; }
 
-    /* Active song highlight */
-    .song-row.active-song { background-color: rgba(29, 185, 84, 0.06) !important; }
+    .song-row.paused-song .row-num { display: none; }
+    .song-row.paused-song .row-pause-icon { display: none !important; }
+    .song-row.paused-song .row-play-icon { display: inline; color: var(--vladify-green); }
+
+    .song-row.playing-song:hover .row-play-icon { display: none !important; }
+    .song-row.playing-song:hover .row-pause-icon { display: inline; color: var(--vladify-green); }
+
+    .song-row.paused-song:hover .row-play-icon { display: inline; color: var(--vladify-green); }
+    .song-row.paused-song:hover .row-pause-icon { display: none !important; }
+
+    .song-row.active-song { background-color: rgba(65, 211, 183, 0.06) !important; }
     .song-row.active-song .song-title { color: var(--vladify-green) !important; }
 
     .song-cover-img {
@@ -670,8 +648,8 @@
         position: fixed;
         bottom: 0; left: 0; right: 0;
         height: var(--player-height);
-        background: #181818;
-        border-top: 1px solid #282828;
+        background: var(--player-bg);
+        border-top: 1px solid var(--player-border);
         z-index: 9999;
         transform: translateY(100%);
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -679,120 +657,119 @@
     .player-bar.visible { transform: translateY(0); }
 
     .player-inner {
-        max-width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        padding: 0 16px;
-        gap: 16px;
+        max-width: 100%; height: 100%;
+        display: flex; align-items: center;
+        padding: 0 32px; gap: 28px;
     }
 
     /* Left */
     .player-left {
-        display: flex; align-items: center; gap: 12px;
-        min-width: 220px; flex: 0 0 auto;
+        display: flex; align-items: center; gap: 18px;
+        min-width: 300px; flex: 0 0 auto;
     }
     .player-cover {
-        width: 56px; height: 56px;
-        border-radius: 6px; object-fit: cover;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        width: 86px; height: 86px;
+        border-radius: 10px; object-fit: cover;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        border: 2px solid var(--player-border);
     }
     .player-song-info { min-width: 0; }
     .player-song-title {
-        color: #fff; font-size: 0.85rem; font-weight: 600;
+        color: #fff; font-size: 1.05rem; font-weight: 700;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        margin-bottom: 2px;
     }
     .player-song-author {
-        color: #b3b3b3; font-size: 0.72rem;
+        color: var(--player-text-muted); font-size: 0.85rem;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
     /* Center */
     .player-center {
         flex: 1; display: flex; flex-direction: column;
-        align-items: center; max-width: 600px; margin: 0 auto;
+        align-items: center; max-width: 680px; margin: 0 auto;
     }
     .player-controls {
-        display: flex; align-items: center; gap: 16px; margin-bottom: 4px;
+        display: flex; align-items: center; gap: 28px; margin-bottom: 8px;
     }
     .player-ctrl-btn {
-        background: none; border: none; color: #b3b3b3;
-        font-size: 1rem; padding: 4px; border-radius: 50%;
+        background: none; border: none; color: var(--player-text-muted);
+        font-size: 1.3rem; padding: 6px; border-radius: 50%;
         transition: all 0.15s; cursor: pointer;
     }
-    .player-ctrl-btn:hover { color: #fff; transform: scale(1.1); }
-    .player-ctrl-btn.active { color: var(--vladify-green); }
-    .player-ctrl-btn.active:hover { color: var(--vladify-green-hover); }
+    .player-ctrl-btn:hover { color: #fff; transform: scale(1.15); }
 
     .play-pause-btn {
-        width: 36px; height: 36px;
-        background: #fff !important;
-        color: #000 !important;
-        font-size: 1.2rem;
+        width: 48px; height: 48px;
+        background: var(--vladify-btn-grad) !important;
+        color: #fff !important;
+        font-size: 1.5rem;
         display: flex; align-items: center; justify-content: center;
-        transition: transform 0.15s, background 0.15s;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 16px rgba(65, 211, 183, 0.3);
     }
     .play-pause-btn:hover {
-        transform: scale(1.08);
-        background: #e0e0e0 !important;
-        color: #000 !important;
+        transform: scale(1.12);
+        background: var(--vladify-btn-hover) !important;
+        color: #fff !important;
+        box-shadow: 0 6px 24px rgba(65, 211, 183, 0.45);
     }
 
     /* Progress bar */
     .player-progress-row {
-        display: flex; align-items: center; gap: 8px; width: 100%;
+        display: flex; align-items: center; gap: 12px; width: 100%;
     }
     .player-time {
-        color: #a7a7a7; font-size: 0.68rem; min-width: 32px;
+        color: var(--player-text-muted); font-size: 0.78rem; min-width: 38px;
         font-family: 'SFMono-Regular', Consolas, monospace;
     }
     .player-progress-bar {
-        flex: 1; height: 16px;
+        flex: 1; height: 20px;
         display: flex; align-items: center;
         position: relative; cursor: pointer;
     }
     .player-progress-bg {
-        width: 100%; height: 4px; border-radius: 2px;
-        background: #4d4d4d; position: relative; overflow: hidden;
+        width: 100%; height: 5px; border-radius: 3px;
+        background: var(--player-bar-bg); position: relative; overflow: hidden;
     }
     .player-progress-fill {
-        height: 100%; background: #b3b3b3; border-radius: 2px;
+        height: 100%; background: var(--player-bar-fill); border-radius: 3px;
         width: 0; transition: none;
     }
-    .player-progress-bar:hover .player-progress-fill { background: var(--vladify-green); }
+    .player-progress-bar:hover .player-progress-fill { background: var(--player-bar-hover); }
     .player-progress-thumb {
-        width: 12px; height: 12px; border-radius: 50%;
+        width: 14px; height: 14px; border-radius: 50%;
         background: #fff; position: absolute; top: 50%;
         transform: translate(-50%, -50%);
         left: 0; opacity: 0; transition: opacity 0.15s;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     }
     .player-progress-bar:hover .player-progress-thumb { opacity: 1; }
 
     /* Right / Volume */
     .player-right {
-        display: flex; align-items: center; gap: 8px;
-        min-width: 160px; flex: 0 0 auto; justify-content: flex-end;
+        display: flex; align-items: center; gap: 10px;
+        min-width: 180px; flex: 0 0 auto; justify-content: flex-end;
     }
     .player-volume-bar {
-        width: 100px; height: 16px;
+        width: 110px; height: 20px;
         display: flex; align-items: center;
         position: relative; cursor: pointer;
     }
     .player-volume-bg {
-        width: 100%; height: 4px; border-radius: 2px;
-        background: #4d4d4d; position: relative; overflow: hidden;
+        width: 100%; height: 5px; border-radius: 3px;
+        background: var(--player-bar-bg); position: relative; overflow: hidden;
     }
     .player-volume-fill {
-        height: 100%; background: #b3b3b3; border-radius: 2px;
+        height: 100%; background: var(--player-bar-fill); border-radius: 3px;
     }
-    .player-volume-bar:hover .player-volume-fill { background: var(--vladify-green); }
+    .player-volume-bar:hover .player-volume-fill { background: var(--player-bar-hover); }
     .player-volume-thumb {
-        width: 12px; height: 12px; border-radius: 50%;
+        width: 14px; height: 14px; border-radius: 50%;
         background: #fff; position: absolute; top: 50%;
         transform: translate(-50%, -50%);
         opacity: 0; transition: opacity 0.15s;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     }
     .player-volume-bar:hover .player-volume-thumb { opacity: 1; }
 
@@ -827,8 +804,7 @@
 
     .btn-vladify-save {
         background: linear-gradient(135deg, #41d3b7 0%, #27b89d 100%);
-        border: none; display: flex; align-items: center; justify-content: center;
-        transition: 0.2s;
+        border: none; display: flex; align-items: center; justify-content: center; transition: 0.2s;
     }
     .btn-vladify-save:hover { filter: brightness(1.1); transform: scale(1.05); }
 
@@ -885,8 +861,7 @@
     }
     .upload-placeholder { padding: 8px 0; }
     .upload-preview {
-        display: flex; align-items: center; gap: 14px;
-        position: relative; z-index: 2;
+        display: flex; align-items: center; gap: 14px; position: relative; z-index: 2;
     }
     .upload-preview-img {
         width: 56px; height: 56px; border-radius: 12px; object-fit: cover;
