@@ -12,7 +12,7 @@ namespace Vladify.Frontend.Pages
         {
             if (string.IsNullOrWhiteSpace(q) || q.Length < 2)
             {
-                return new JsonResult(new { songs = Array.Empty<object>(), users = Array.Empty<object>() });
+                return new JsonResult(new { songs = Array.Empty<object>(), users = Array.Empty<object>(), playlists = Array.Empty<object>() });
             }
 
             var accessToken = await HttpContext.GetTokenAsync("access_token");
@@ -23,9 +23,18 @@ namespace Vladify.Frontend.Pages
 
             return new JsonResult(new
             {
-                songs = result.Songs,
+                songs = result.Songs.Select(s => new
+                {
+                    id = s.Id,
+                    title = s.Title,
+                    album = s.Album,
+                    author = s.Author,
+                    duration = s.Duration.ToString(@"hh\:mm\:ss"),
+                    audioUrl = s.AudioUrl,
+                    imageUrl = s.ImageUrl
+                }),
                 users = result.Users,
-                playlists
+                playlists = playlists.Select(p => new { id = p.Id, name = p.Name })
             });
         }
 

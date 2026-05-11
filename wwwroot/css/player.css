@@ -1,0 +1,393 @@
+﻿:root {
+    --player-height: 120px;
+    --player-bg: #1a1a2e;
+    --player-border: #25254a;
+    --player-text: #e0e0e0;
+    --player-text-muted: #8a8ab0;
+    --player-bar-bg: #3a3a5c;
+    --player-bar-fill: #74b9ff;
+    --player-bar-hover: #41d3b7;
+    --vladify-green: #41d3b7;
+    --vladify-green-hover: #51e3c7;
+    --vladify-btn-grad: linear-gradient(135deg, #41d3b7 0%, #27b89d 100%);
+    --vladify-btn-hover: linear-gradient(135deg, #51e3c7 0%, #2cccae 100%);
+}
+
+/* ==================== PLAYER BAR ==================== */
+.player-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--player-height);
+    background: var(--player-bg);
+    border-top: 1px solid var(--player-border);
+    z-index: 9999;
+    transform: translateY(100%); /* Изначально скрыт */
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+    .player-bar.visible {
+        transform: translateY(0);
+    }
+/* Показывается */
+
+.player-inner {
+    max-width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    gap: 28px;
+}
+
+/* Left */
+.player-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-width: 300px;
+    flex: 0 0 auto;
+}
+
+.player-cover {
+    width: 86px;
+    height: 86px;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    border: 2px solid var(--player-border);
+}
+
+.player-song-info {
+    min-width: 0;
+}
+
+.player-song-title {
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.player-song-author {
+    color: var(--player-text-muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Center */
+.player-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-bottom: 8px;
+}
+
+.player-ctrl-btn {
+    background: none;
+    border: none;
+    color: var(--player-text-muted);
+    font-size: 1.3rem;
+    padding: 6px;
+    border-radius: 50%;
+    transition: all 0.15s;
+    cursor: pointer;
+}
+
+    .player-ctrl-btn:hover {
+        color: #fff;
+        transform: scale(1.15);
+    }
+
+.play-pause-btn {
+    width: 48px;
+    height: 48px;
+    background: var(--vladify-btn-grad) !important;
+    color: #fff !important;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(65, 211, 183, 0.3);
+}
+
+    .play-pause-btn:hover {
+        transform: scale(1.12);
+        background: var(--vladify-btn-hover) !important;
+        color: #fff !important;
+        box-shadow: 0 6px 24px rgba(65, 211, 183, 0.45);
+    }
+
+/* Progress */
+.player-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.player-time {
+    color: var(--player-text-muted);
+    font-size: 0.78rem;
+    min-width: 38px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+}
+
+.player-progress-bar {
+    flex: 1;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.player-progress-bg {
+    width: 100%;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--player-bar-bg);
+    position: relative;
+    overflow: hidden;
+}
+
+.player-progress-fill {
+    height: 100%;
+    background: var(--player-bar-fill);
+    border-radius: 3px;
+    width: 0;
+    transition: none;
+}
+
+.player-progress-bar:hover .player-progress-fill {
+    background: var(--player-bar-hover);
+}
+
+.player-progress-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    left: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+.player-progress-bar:hover .player-progress-thumb {
+    opacity: 1;
+}
+
+/* Volume */
+.player-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 180px;
+    flex: 0 0 auto;
+    justify-content: flex-end;
+}
+
+.player-volume-bar {
+    width: 110px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.player-volume-bg {
+    width: 100%;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--player-bar-bg);
+    position: relative;
+    overflow: hidden;
+}
+
+.player-volume-fill {
+    height: 100%;
+    background: var(--player-bar-fill);
+    border-radius: 3px;
+}
+
+.player-volume-bar:hover .player-volume-fill {
+    background: var(--player-bar-hover);
+}
+
+.player-volume-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.15s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+.player-volume-bar:hover .player-volume-thumb {
+    opacity: 1;
+}
+
+/* Padding for pages */
+.pb-player {
+    padding-bottom: calc(var(--player-height) + 24px);
+}
+
+/* ==================== SONG ROWS (global) ==================== */
+.song-row-number {
+    position: relative;
+    min-width: 28px;
+}
+
+.row-play-icon, .row-pause-icon {
+    display: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+.row-num {
+    display: inline;
+}
+
+.song-row:hover .row-num {
+    display: none;
+}
+
+.song-row:hover .row-play-icon {
+    display: inline;
+    color: var(--accent-color, #74b9ff);
+}
+
+.song-row.playing-song .row-num {
+    display: none;
+}
+
+.song-row.playing-song .row-play-icon {
+    display: none !important;
+}
+
+.song-row.playing-song .row-pause-icon {
+    display: inline;
+    color: var(--vladify-green);
+}
+
+.song-row.paused-song .row-num {
+    display: none;
+}
+
+.song-row.paused-song .row-pause-icon {
+    display: none !important;
+}
+
+.song-row.paused-song .row-play-icon {
+    display: inline;
+    color: var(--vladify-green);
+}
+
+.song-row.playing-song:hover .row-play-icon {
+    display: none !important;
+}
+
+.song-row.playing-song:hover .row-pause-icon {
+    display: inline;
+    color: var(--vladify-green);
+}
+
+.song-row.paused-song:hover .row-play-icon {
+    display: inline;
+    color: var(--vladify-green);
+}
+
+.song-row.paused-song:hover .row-pause-icon {
+    display: none !important;
+}
+
+.song-row.active-song {
+    background-color: rgba(65, 211, 183, 0.06) !important;
+}
+
+    .song-row.active-song .song-title {
+        color: var(--vladify-green) !important;
+    }
+/* ==================== MAIN PLAY BUTTON (круглая зелёная) ==================== */
+.btn-vladify-play {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--vladify-btn-grad);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    cursor: pointer;
+}
+
+.vladify-play-svg {
+    display: none;
+    width: 40px;
+    height: 40px;
+}
+
+.btn-vladify-play.paused .vladify-symbol-paused {
+    display: block;
+    margin-left: 5px;
+}
+
+.btn-vladify-play.playing .vladify-symbol-playing {
+    display: block;
+}
+
+.btn-vladify-play:hover {
+    transform: scale(1.1);
+    background: var(--vladify-btn-hover);
+    box-shadow: 0 8px 20px rgba(39, 184, 157, 0.4) !important;
+}
+
+.btn-vladify-play:active {
+    transform: scale(0.95);
+}
+/* Кнопка Play в результатах поиска */
+.search-play-btn {
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 2px 8px rgba(39, 184, 157, 0.3);
+}
+
+    .search-play-btn:hover {
+        transform: scale(1.15);
+        box-shadow: 0 4px 14px rgba(39, 184, 157, 0.5);
+    }
+
+    .search-play-btn:active {
+        transform: scale(0.95);
+    }
+
+/* Hover на песне в поиске */
+.search-song-item:hover {
+    background-color: rgba(116, 185, 255, 0.08) !important;
+}

@@ -133,3 +133,39 @@ body {
 .pagination .page-item.disabled .page-link {
     background-color: #f8f9fa;
 }
+.vladify-header {
+    background: linear-gradient(90deg, #66A5AD 0%, #85B9C0 100%) !important;
+}
+
+    .vladify-header .navbar-brand {
+        color: white !important;
+        font-weight: 500;
+    }
+
+.hover-accent:hover {
+    color: var(--accent) !important;
+    transform: scale(1.1);
+    transition: 0.2s;
+}
+
+.playlist-add-btn {
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    border-radius: 50% !important;
+}
+
+    .playlist-add-btn i {
+        transition: all 0.2s ease !important;
+    }
+
+    .playlist-add-btn:hover {
+        transform: scale(1.15);
+        background-color: rgba(39, 184, 157, 0.1) !important;
+    }
+
+        .playlist-add-btn:hover i {
+            color: var(--accent-color, #27b89d) !important;
+        }
+
+    .playlist-add-btn:active {
+        transform: scale(0.95);
+    }

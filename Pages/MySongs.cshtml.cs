@@ -8,7 +8,7 @@ using Vladify.Frontend.services;
 
 namespace Vladify.Frontend.Pages
 {
-    public class MySongsModel(UserService userService, SongService songService) : PageModel
+    public class MySongsModel(UserService userService, SongService songService, ILogger<MySongsModel> logger) : PageModel
     {
         [BindProperty]
         public SongAddRequestModel SongAddRequestModel { get; set; }
@@ -58,6 +58,7 @@ namespace Vladify.Frontend.Pages
             }
             catch (Exception ex)
             {
+                logger.LogError(ex.Message);
                 TempData["ErrorMessage"] = ex.Message;
 
                 return RedirectToPage("MySongs");
