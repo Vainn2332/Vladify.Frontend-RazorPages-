@@ -123,15 +123,16 @@ const PlayerApp = (function () {
         if (idx < 0 || idx >= playlist.length) return;
 
         const song = playlist[idx];
-        currentSongDetails = song; // Сохраняем детали текущей песни
+        currentSongDetails = song;
 
         audio.src = song.audioUrl;
+        audio.currentTime = 0;  // ← гарантируем начало с нуля
         audio.play();
 
         updatePlayerBar(song);
         showPlayer();
         highlightRows(idx, true);
-        savePlayerState(); // Сохраняем состояние после смены песни
+        savePlayerState();
     }
 
     function playById(songId) {
@@ -149,19 +150,20 @@ const PlayerApp = (function () {
 
     // Клик по строке — play/pause toggle
     function onRowClick(idx) {
-        // Если кликнули по той же песне, что сейчас играет
+        // Если кликнули по той же песне которая играет — ставим на паузу
         if (currentSongDetails && idx === currentSongDetails.index && !audio.paused) {
             audio.pause();
             savePlayerState();
             return;
         }
-        // Если кликнули по той же песне, что сейчас на паузе
+        // Если кликнули по той же песне на паузе — играем СНАЧАЛА
         if (currentSongDetails && idx === currentSongDetails.index && audio.paused) {
+            audio.currentTime = 0;
             audio.play();
             savePlayerState();
             return;
         }
-        // Новая песня
+        // Новая песня — playSongByIndex уже всегда начинает сначала (так как меняется audio.src)
         playSongByIndex(idx);
     }
 
@@ -251,7 +253,7 @@ const PlayerApp = (function () {
         const dur = document.getElementById('playerDuration');
         if (dur) dur.textContent = formatTime(audio.duration);
 
-        // После загрузки метаданных, если была сохраненная позиция, восстанавливаем ее
+       /* // После загрузки метаданных, если была сохраненная позиция, восстанавливаем ее
         const savedState = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
         if (savedState && savedState.currentSongDetails && savedState.currentSongDetails.id === currentSongDetails.id && savedState.currentTime > 0) {
             audio.currentTime = savedState.currentTime;
@@ -259,7 +261,7 @@ const PlayerApp = (function () {
         // Если была playing, запускаем (но это может быть проблематично на перезагрузке страницы, лучше ручной запуск)
         // if (savedState && savedState.isPlaying && audio.paused) {
         //     audio.play();
-        // }
+        // }*/
     }
 
     function seekTo(e) {
