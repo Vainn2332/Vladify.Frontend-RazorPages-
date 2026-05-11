@@ -9,7 +9,22 @@ public class SongService(HttpClient client)
     public async Task<SongModel> CreateSongAsync(SongAddRequestModel songAddRequestModel, string accessToken, CancellationToken cancellationToken)
     {
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        var response = await client.PostAsJsonAsync<SongAddRequestModel>($"{MyConstants.BaseApiUrl}/api/songs", songAddRequestModel);
+        using var content = new MultipartFormDataContent();
+
+        content.Add(new StringContent(songAddRequestModel.Title), "title");
+        content.Add(new StringContent(songAddRequestModel.Album), "album");
+        content.Add(new StringContent(songAddRequestModel.Duration.ToString()), "duration");
+
+        var audioStream = songAddRequestModel.AudioFile.OpenReadStream();
+        var audioContent = new StreamContent(audioStream);
+        content.Add(audioContent, "audioFile", songAddRequestModel.AudioFile.FileName);
+
+        var imageStream = songAddRequestModel.Image.OpenReadStream();
+        var imageContent = new StreamContent(imageStream);
+        content.Add(imageContent, "image", songAddRequestModel.Image.FileName);
+
+
+        var response = await client.PostAsync($"{MyConstants.BaseApiUrl}/api/songs", content, cancellationToken);
 
         if (response.IsSuccessStatusCode)
         {
