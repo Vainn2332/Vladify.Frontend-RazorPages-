@@ -7,4 +7,8 @@ public class SongAddRequestModel
     public required string Album { get; set; }
 
     public TimeSpan Duration { get; set; }
+
+    public required IFormFile AudioFile { get; set; }
+
+    public required IFormFile Image { get; set; }
 }
