@@ -372,3 +372,22 @@
 .btn-vladify-play:active {
     transform: scale(0.95);
 }
+/* Кнопка Play в результатах поиска */
+.search-play-btn {
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 2px 8px rgba(39, 184, 157, 0.3);
+}
+
+    .search-play-btn:hover {
+        transform: scale(1.15);
+        box-shadow: 0 4px 14px rgba(39, 184, 157, 0.5);
+    }
+
+    .search-play-btn:active {
+        transform: scale(0.95);
+    }
+
+/* Hover на песне в поиске */
+.search-song-item:hover {
+    background-color: rgba(116, 185, 255, 0.08) !important;
+}
