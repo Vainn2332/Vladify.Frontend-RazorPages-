@@ -194,18 +194,8 @@
         // Загружаем плейлист из строк таблицы на этой странице
         PlayerApp.loadPlaylistFromRows();
 
-        // Также обновляем состояние UI плеера на основе текущего глобального состояния
-        const currentSongId = PlayerApp.getCurrentSongId();
-        if (currentSongId) {
-            const currentSongIndexInPage = PlayerApp.playlist.findIndex(s => s.id === currentSongId);
-            if (currentSongIndexInPage !== -1) {
-                PlayerApp.updateAllUI(PlayerApp.isPlaying());
-            } else {
-                PlayerApp.updateAllUI(PlayerApp.isPlaying());
-            }
-        } else {
-             PlayerApp.updateAllUI(PlayerApp.isPlaying());
-        }
+        // Обновляем UI плеера
+        PlayerApp.updateAllUI(PlayerApp.isPlaying());
 
         // Логика переключения формы редактирования названия плейлиста
         function toggleEditName() {
@@ -225,51 +215,100 @@
 }
 
 <style>
-    /* Удаляем все стили плеера и кнопок play/pause,
-       так как они теперь определены глобально в player.css */
-
-    /* Оставляем только специфичные для этой страницы стили */
+    /* Специфичные для этой страницы стили */
     .playlist-hero-cover {
         width: 170px;
         height: 170px;
     }
 
-    .grad-purple { background: linear-gradient(135deg, #a777ef 0%, #8c5cdb 100%); }
+    .grad-purple {
+        background: linear-gradient(135deg, #a777ef 0%, #8c5cdb 100%);
+    }
 
-    /* Стили для таблицы песен */
-    .custom-table thead th { border-bottom: none; font-size: 0.7rem; color: #adb5bd; }
-    /* Song-row styles (active, playing, paused) должны браться из player.css */
-    .song-row { cursor: pointer; transition: background-color 0.2s; }
-    .song-row:hover { background-color: rgba(116, 185, 255, 0.05) !important; }
-    .song-row:hover .song-title { color: var(--accent-color); }
-
-    /* Обложка песни в таблице */
+    /* ===== ОБЛОЖКА ПЕСНИ ===== */
     .song-cover-img {
-        width: 38px;
-        height: 38px;
+        width: 56px !important;
+        height: 56px !important;
         object-fit: cover;
-        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 6px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         flex-shrink: 0;
     }
 
     .song-icon-placeholder {
-        width: 38px;
-        height: 38px;
+        width: 56px;
+        height: 56px;
         background-color: #f8f9fa;
-        border: 1px solid rgba(0,0,0,0.02);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 6px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    .text-accent { color: var(--accent-color); }
-    .mono { font-family: 'SFMono-Regular', Consolas, monospace; letter-spacing: -0.5px; }
+        .song-icon-placeholder .bi {
+            font-size: 1.5rem;
+        }
 
-    /* Стили для alert-ов */
+    .text-accent {
+        color: var(--accent-color, #74b9ff);
+    }
+
+    .mono {
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        letter-spacing: -0.5px;
+    }
+
+    /* ===== ALERT ===== */
     .alert-soft-warning {
         background-color: #fff9db;
         border: 1px solid #ffec99;
         color: #f08c00;
     }
 
-    /* Стили для кнопок редактирования и удаления */
+    /* ===== ГЛАВНАЯ ЗЕЛЁНАЯ КНОПКА PLAY ===== */
+    .btn-vladify-play {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #41d3b7 0%, #27b89d 100%);
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        cursor: pointer;
+    }
+
+    .vladify-play-svg {
+        display: none;
+        width: 40px;
+        height: 40px;
+    }
+
+    .btn-vladify-play.paused .vladify-symbol-paused {
+        display: block;
+        margin-left: 5px;
+    }
+
+    .btn-vladify-play.playing .vladify-symbol-playing {
+        display: block;
+    }
+
+    .btn-vladify-play:hover {
+        transform: scale(1.1);
+        background: linear-gradient(135deg, #51e3c7 0%, #2cccae 100%);
+        box-shadow: 0 8px 20px rgba(39, 184, 157, 0.4) !important;
+    }
+
+    .btn-vladify-play:active {
+        transform: scale(0.95);
+    }
+
+    /* ===== КНОПКА УДАЛЕНИЯ ПЕСНИ ===== */
     .btn-delete-song {
         background: none;
         border: none;
@@ -278,24 +317,28 @@
         padding: 5px;
         border-radius: 8px;
         position: relative;
-        z-index: 2; /* чтобы был над onclick строки */
-    }
-    .btn-delete-song:hover {
-        color: #ff4757;
-        background-color: rgba(255, 71, 87, 0.1);
-        transform: scale(1.1);
+        z-index: 2;
     }
 
+        .btn-delete-song:hover {
+            color: #ff4757;
+            background-color: rgba(255, 71, 87, 0.1);
+            transform: scale(1.1);
+        }
+
+    /* ===== КНОПКА РЕДАКТИРОВАНИЯ НАЗВАНИЯ ===== */
     .edit-icon-btn {
         transition: all 0.2s ease;
         opacity: 0.6;
     }
-    .edit-icon-btn:hover {
-        opacity: 1;
-        color: var(--vladify-green, #27b89d) !important; /* Используем новую переменную */
-        transform: scale(1.1);
-    }
 
+        .edit-icon-btn:hover {
+            opacity: 1;
+            color: #27b89d !important;
+            transform: scale(1.1);
+        }
+
+    /* ===== КНОПКА СОХРАНЕНИЯ (для редактирования названия) ===== */
     .btn-vladify-save {
         background: linear-gradient(135deg, #41d3b7 0%, #27b89d 100%);
         border: none;
@@ -305,13 +348,15 @@
         align-items: center;
         justify-content: center;
         transition: 0.2s;
-        border-radius: 50px; /* Круглая кнопка для сохранения */
-    }
-    .btn-vladify-save:hover {
-        filter: brightness(1.1);
-        transform: scale(1.05);
+        border-radius: 50%;
     }
 
+        .btn-vladify-save:hover {
+            filter: brightness(1.1);
+            transform: scale(1.05);
+        }
+
+    /* ===== КНОПКА УДАЛИТЬ ПЛЕЙЛИСТ ===== */
     .btn-delete-playlist-main {
         background-color: rgba(255, 71, 87, 0.05);
         color: #ff4757;
@@ -320,18 +365,19 @@
         transition: all 0.2s ease;
     }
 
-    .btn-delete-playlist-main:hover {
-        background-color: #ff4757;
-        color: white;
-        border-color: #ff4757;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
-    }
+        .btn-delete-playlist-main:hover {
+            background-color: #ff4757;
+            color: white;
+            border-color: #ff4757;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+        }
 
-    .btn-delete-playlist-main:active {
-        transform: translateY(0);
-    }
+        .btn-delete-playlist-main:active {
+            transform: translateY(0);
+        }
 
+    /* ===== КНОПКА ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ ===== */
     .btn-soft-confirm {
         background-color: #ee5253;
         color: #ffffff;
@@ -340,14 +386,14 @@
         box-shadow: 0 4px 12px rgba(238, 82, 83, 0.3);
     }
 
-    .btn-soft-confirm:hover {
-        background-color: #d43d3d;
-        color: #ffffff;
-        box-shadow: 0 6px 18px rgba(255, 87, 88, 0.45);
-        transform: translateY(-1px);
-    }
+        .btn-soft-confirm:hover {
+            background-color: #d43d3d;
+            color: #ffffff;
+            box-shadow: 0 6px 18px rgba(255, 87, 88, 0.45);
+            transform: translateY(-1px);
+        }
 
-    .btn-soft-confirm:active {
-        transform: scale(0.98);
-    }
+        .btn-soft-confirm:active {
+            transform: scale(0.98);
+        }
 </style>
