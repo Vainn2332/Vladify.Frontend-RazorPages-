@@ -46,6 +46,14 @@ public class SongService(HttpClient client)
         return songs!;
     }
 
+    public async Task<ICollection<SongModel>> GetRecentSongsAsync(PaginationFilter paginationFilter, string accessToken, CancellationToken cancellationToken)
+    {
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        var songs = await client.GetFromJsonAsync<ICollection<SongModel>>($"{MyConstants.BaseApiUrl}/api/songs/recent?pageNumber={paginationFilter.PageNumber}&pageSize={paginationFilter.PageSize}");
+
+        return songs!;
+    }
+
     public async Task DeleteSongAsync(Guid songId, string accessToken, CancellationToken cancellationToken)
     {
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
