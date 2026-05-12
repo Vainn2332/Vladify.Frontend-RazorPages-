@@ -32,16 +32,52 @@ builder.Services.Configure<OpenIdConnectOptions>(Auth0Constants.AuthenticationSc
 {
     options.Events.OnRemoteFailure = context =>
     {
-        if (context.Failure != null && context.Failure.Message.Contains("access_denied"))
+        var errorType = "unknown";
+
+        if (context.Failure != null)
         {
-            context.Response.Redirect("Account/Login?errorType=canceled");
-            context.HandleResponse();
+            var msg = context.Failure.Message?.ToLower() ?? "";
+
+            // Email не подтверждён
+            if (msg.Contains("email") && (msg.Contains("verified") || msg.Contains("verify")))
+            {
+                errorType = "email_not_verified";
+            }
+            // Пользователь отменил вход
+            else if (msg.Contains("access_denied"))
+            {
+                // Проверяем, не email_not_verified ли это (Auth0 часто шлёт access_denied с email-описанием)
+                var queryError = context.Request.Query["error_description"].ToString().ToLower();
+
+                if (queryError.Contains("email") && (queryError.Contains("verified") || queryError.Contains("verify")))
+                {
+                    errorType = "email_not_verified";
+                }
+                else
+                {
+                    errorType = "canceled";
+                }
+            }
         }
-        else
+
+        // Также проверим query параметры напрямую (Auth0 шлёт их в редиректе)
+        if (context.Request.Query.ContainsKey("error_description"))
         {
-            context.Response.Redirect("Account/Login?errorType=unknown");
-            context.HandleResponse();
+            var desc = context.Request.Query["error_description"].ToString().ToLower();
+            if (desc.Contains("email") && (desc.Contains("verified") || desc.Contains("verify")))
+            {
+                errorType = "email_not_verified";
+            }
         }
+
+        // Передаём email если есть, чтобы показать в сообщении
+        var email = context.Request.Query["email"].ToString();
+        var redirectUrl = string.IsNullOrEmpty(email)
+            ? $"/Account/Login?errorType={errorType}"
+            : $"/Account/Login?errorType={errorType}&email={Uri.EscapeDataString(email)}";
+
+        context.Response.Redirect(redirectUrl);
+        context.HandleResponse();
 
         return Task.CompletedTask;
     };

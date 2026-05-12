@@ -19,7 +19,7 @@ namespace Vladify.Frontend.Pages.Account
 
         private IActionResult ExecuteLogout()
         {
-            var redirectUrl = Url.Page("/Account/Login");
+            var redirectUrl = Url.Page("/Account/Login", new { errorType = "logout" });
 
             var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
                 .WithRedirectUri(redirectUrl!)
