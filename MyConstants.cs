@@ -7,4 +7,6 @@ public static class MyConstants
     public const int PlaylistsPaginationPageSize = 10;
 
     public const int DropBoxPlaylistsPaginationPageSize = 100;
+
+    public const int NewSongsPaginationPageSize = 100;
 }
