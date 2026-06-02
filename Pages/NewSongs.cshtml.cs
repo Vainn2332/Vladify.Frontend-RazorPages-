@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Vladify.Frontend.models;
+using Vladify.Frontend.models.SongModels;
 using Vladify.Frontend.services;
 
 namespace Vladify.Frontend.Pages
